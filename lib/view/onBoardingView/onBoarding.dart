@@ -11,15 +11,25 @@ class onBoarding extends GetView<onboradingGetx> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          onBoardingStack(),
-          Expanded(
-            child: pageViewBuilder(),
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
           ),
-          onBoardingButton(),
-        ],
+          child: Column(
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: onBoardingStack(),
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.4, // Adjust as needed
+                child: pageViewBuilder(),
+              ),
+              onBoardingButton(),
+            ],
+          ),
+        ),
       ),
     );
   }

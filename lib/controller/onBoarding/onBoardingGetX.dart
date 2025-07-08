@@ -1,39 +1,57 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-
 import '../../view/auth/signup.dart';
 import '../variables.dart';
 import 'onBoardingListItem.dart';
 
 class onboradingGetx extends GetxController {
-  RxInt currentPage = 0.obs;
-  late PageController pageController;
-  Color color = mainColor;
-  String buttonText = "Next";
+  final RxInt currentPage = 0.obs;
+  late final PageController pageController;
+  final Rx<Color> color = mainColor.obs;
+  final RxString buttonText = "Next".obs;
 
-  onPageChanged(int index) {
-    currentPage.value = index;
-    update();
+  void onPageChanged(int index) {
+    currentPage.value = index.clamp(0, onboardingList.length - 1);
+    _updateButtonState();
   }
 
-  next() {
-    currentPage++;
-    if (currentPage.value > onboardingList.length - 1) {
-      Get.offAll(signup());
+  void next() {
+    final nextPage = currentPage.value + 1;
+
+
+    if (nextPage >= onboardingList.length) {
+      Get.offAll(() => const signup());
+      return;
     }
+
+    currentPage.value = nextPage;
+    pageController.animateToPage(
+      nextPage,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+    _updateButtonState();
+  }
+
+  void _updateButtonState() {
     if (currentPage.value == onboardingList.length - 1) {
-      buttonText = "Get Started";
-      color = secondaryColor;
+      buttonText.value = "Get Started";
+      color.value = secondaryColor;
+    } else {
+      buttonText.value = "Next";
+      color.value = mainColor;
     }
-    pageController.animateToPage(currentPage.value,
-        duration: Duration(microseconds: 900), curve: Curves.bounceInOut);
-    update();
   }
 
   @override
   void onInit() {
     pageController = PageController();
     super.onInit();
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
   }
 }

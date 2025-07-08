@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/signup",
+      initialRoute: "/onBoarding",
       getPages: [
         GetPage(name: "/onBoarding", page: () => onBoarding()),
         GetPage(name: "/login", page: () => login()),
@@ -38,8 +38,6 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/otp", page: () => otp()),
         GetPage(name: "/forgotPassword", page: () => forgotPassword()),
         GetPage(name: "/updatePassword", page: () => updatePassword()),
-
-
       ],
     );
   }
