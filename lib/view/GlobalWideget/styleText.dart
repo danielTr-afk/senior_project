@@ -20,7 +20,7 @@ class styleText extends StatelessWidget {
     return Text(text,
         textAlign: textAlign,
         style: TextStyle(
-            fontFamily: "GentiumBookPlus-Regular.ttf",
+            fontFamily: "GentiumBookPlus",
             fontSize: fSize,
             color: color,
             fontWeight: fontWeight));

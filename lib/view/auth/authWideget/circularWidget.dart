@@ -14,18 +14,12 @@ class circularWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.4,
+        height: MediaQuery.of(context).size.height * 0.34,
         width: MediaQuery.of(context).size.width * 0.9,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5000),
-            gradient: LinearGradient(
-                colors: [mainColor, Colors.white],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter)),
         child: Center(
             child: styleText(
               text: text,
-              fSize: 60,
+              fSize: 80,
               color: secondaryColor,
               fontWeight: FontWeight.bold,
               textAlign: TextAlign.center,
