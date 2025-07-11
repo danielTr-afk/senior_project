@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../variables.dart';
 
 class splashScreen extends StatefulWidget {
@@ -29,7 +28,6 @@ class _splashScreenState extends State<splashScreen>
   void initState() {
     super.initState();
 
-    /// Each letter drop
     _letterControllers = List.generate(
       text.length,
           (i) => AnimationController(
@@ -44,13 +42,27 @@ class _splashScreenState extends State<splashScreen>
           .animate(controller);
     }).toList();
 
-    for (int i = 0; i < _letterControllers.length; i++) {
-      Future.delayed(Duration(milliseconds: 250 * i), () {
-        _letterControllers[i].forward();
-      });
-    }
+    /// 🕒 Add pre-animation delay here
+    Future.delayed(const Duration(milliseconds: 800), () {
+      for (int i = 0; i < _letterControllers.length; i++) {
+        Future.delayed(Duration(milliseconds: 250 * i), () {
+          _letterControllers[i].forward();
+        });
+      }
 
-    // Zoom animation
+      // Zoom and light effect after letters drop
+      Future.delayed(Duration(milliseconds: 250 * text.length + 300), () {
+        _zoomController.forward();
+        _lightController.forward();
+      });
+
+      // Navigate after full animation
+      Future.delayed(Duration(milliseconds: 250 * text.length + 4300), () {
+        Get.offNamed("/onBoarding");
+      });
+    });
+
+    // Setup zoom and light animations
     _zoomController = AnimationController(
       duration: const Duration(milliseconds: 1200),
       vsync: this,
@@ -59,24 +71,12 @@ class _splashScreenState extends State<splashScreen>
         .chain(CurveTween(curve: Curves.easeOutExpo))
         .animate(_zoomController);
 
-    // Light sweep animation (slow and smooth)
     _lightController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
     _lightAnimation = Tween<double>(begin: -1.0, end: 2.0)
         .animate(CurvedAnimation(parent: _lightController, curve: Curves.easeInOut));
-
-    // Trigger zoom and light after letters finish
-    Future.delayed(Duration(milliseconds: 250 * text.length + 300), () {
-      _zoomController.forward();
-      _lightController.forward();
-    });
-
-    // Move to onboarding screen after a pause
-    Future.delayed(Duration(milliseconds: 250 * text.length + 4300), () {
-      Get.offNamed("/onBoarding");
-    });
   }
 
   @override
