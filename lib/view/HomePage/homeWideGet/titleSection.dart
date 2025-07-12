@@ -26,13 +26,13 @@ class titleSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              styleText(text: text, fSize: 30, color: color),
+              styleText(text: text, fSize: 40, color: color),
               InkWell(
                   onTap: () {
                     Get.toNamed(onTap);
                   },
                   child: styleText(
-                      text: "see all", fSize: 15, color: secondaryColor))
+                      text: "see all", fSize: 20, color: secondaryColor))
             ],
           ),
         ),

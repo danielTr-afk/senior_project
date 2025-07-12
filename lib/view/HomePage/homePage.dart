@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/authController/loginGetX.dart';
-import '../../controller/books/BooksController.dart';
+import '../../controller/books/booksController.dart';
 import '../../controller/variables.dart';
 import '../GlobalWideget/styleText.dart';
 import 'homeWideGet/bfCard.dart';

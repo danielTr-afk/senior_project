@@ -25,7 +25,7 @@ class onBoardingButton extends StatelessWidget {
           onPressed: controller.next,
           child: styleText(
             text: controller.buttonText.value,
-            fSize: 20,
+            fSize: 30,
             color: textColor2,
           ),
         ),

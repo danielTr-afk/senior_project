@@ -57,6 +57,9 @@ class homeBottomNav extends StatelessWidget {
         }else if(val ==1){
           Get.offAllNamed("/booksCategories");
         }
+        else if(val ==2){
+          Get.offAllNamed("/moviesCategories");
+        }
       },
     );
   }

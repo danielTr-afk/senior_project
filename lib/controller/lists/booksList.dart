@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../view/GlobalWideget/styleText.dart';
-import '../books/BooksController.dart';
+import '../books/booksController.dart';
 import '../variables.dart';
 
 final controller = Get.put(BooksController());
