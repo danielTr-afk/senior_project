@@ -44,7 +44,7 @@ class moviesCategories extends StatelessWidget {
 
         return Container(
           padding: const EdgeInsets.all(15),
-          color: textColor2,
+          color: blackColor2,
           child: ListView.builder(
             itemCount: categories.length,
             itemBuilder: (context, index) {
@@ -57,7 +57,7 @@ class moviesCategories extends StatelessWidget {
                   titleSection(
                     text: category,
                     onTap: "/moviesListPage", // optional route
-                    color: mainColor,
+                    color: textColor2,
                   ),
                   SizedBox(
                     height: 315,

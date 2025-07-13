@@ -21,13 +21,13 @@ class listForm extends StatelessWidget {
             Get.offAll(nav);
           },
           leading: Image(image: AssetImage(image)),
-          title: styleText(text: title, fSize: 30, color: mainColor, fontWeight: FontWeight.bold,),
+          title: styleText(text: title, fSize: 30, color: textColor2, fontWeight: FontWeight.bold,),
           subtitle: styleText(text: "$subtitle. \nNumber of like $numLike", fSize: 20, color: mainColor2!,),
-          trailing: Icon(Icons.navigate_next, size: 40,),
+          trailing: Icon(Icons.navigate_next, size: 40, color: textColor2,),
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20)
           ),
-          tileColor: Colors.grey.shade300,
+          tileColor: blackColor2,
         ),
         SizedBox(height: 10,)
       ],

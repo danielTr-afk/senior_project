@@ -15,6 +15,7 @@ class booksListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: mainColor,
       appBar: AppBar(
         title: styleText(text: "Books", fSize: 30, color: secondaryColor, fontWeight: FontWeight.bold,),
         backgroundColor: mainColor,

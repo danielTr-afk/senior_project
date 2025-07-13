@@ -35,7 +35,7 @@ class booksCategories extends StatelessWidget {
       bottomNavigationBar: homeBottomNav(index: 1),
       body: Container(
         padding: const EdgeInsets.all(15),
-        color: textColor2,
+        color: blackColor2,
         child: Obx(() {
           if (booksController.isLoading.value) {
             return const Center(child: CircularProgressIndicator());
@@ -57,7 +57,7 @@ class booksCategories extends StatelessWidget {
                 children: [
                   titleSection(
                     text: categoryName,
-                    color: mainColor,
+                    color: textColor2,
                     onTap: "/booksListPage", // You can later pass category name
                   ),
                   const SizedBox(height: 10),

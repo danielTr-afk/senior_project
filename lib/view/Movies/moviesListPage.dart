@@ -15,6 +15,7 @@ class moviesListPage extends StatelessWidget {
     final moviesController controller = Get.put(moviesController());
 
     return Scaffold(
+      backgroundColor: mainColor,
       appBar: AppBar(
         title: styleText(
           text: "Movies",

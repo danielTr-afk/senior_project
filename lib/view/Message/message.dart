@@ -17,7 +17,7 @@ class message extends StatelessWidget {
     return Scaffold(
       backgroundColor: mainColor,
       appBar: AppBar(
-        backgroundColor: blackColor,
+        backgroundColor: mainColor,
         elevation: 0,
         leading: Icon(Icons.arrow_back_ios, color: textColor2),
         title: Row(

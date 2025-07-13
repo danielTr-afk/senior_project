@@ -60,6 +60,9 @@ class homeBottomNav extends StatelessWidget {
         else if(val ==2){
           Get.offAllNamed("/moviesCategories");
         }
+        else if(val ==3){
+          Get.offAllNamed("/ChatPage");
+        }
       },
     );
   }

@@ -1,3 +1,4 @@
+import 'package:f_book2/view/Message/ChatPage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:f_book2/view/Books/booksCategories.dart';
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/message",
+      initialRoute: "/splashScreen",
       getPages: [
         GetPage(name: "/splashScreen", page: () => splashScreen()),
         GetPage(name: "/onBoarding", page: () => onBoarding()),
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/forgotPassword", page: () => forgotPassword()),
         GetPage(name: "/updatePassword", page: () => updatePassword()),
         GetPage(name: "/message", page: () => message()),
+        GetPage(name: "/ChatPage", page: () => ChatPage()),
       ],
     );
   }
