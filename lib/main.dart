@@ -12,6 +12,7 @@ import 'package:f_book2/view/auth/updatePassword.dart';
 import 'package:f_book2/view/onBoardingView/onBoarding.dart';
 import 'controller/myBindings.dart';
 import 'controller/splahScreen/splashScreen.dart';
+import 'view/Message/message.dart';
 import 'view/Movies/moviesCategories.dart';
 
 void main() {
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/moviesCategories",
+      initialRoute: "/message",
       getPages: [
         GetPage(name: "/splashScreen", page: () => splashScreen()),
         GetPage(name: "/onBoarding", page: () => onBoarding()),
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/otp", page: () => otp()),
         GetPage(name: "/forgotPassword", page: () => forgotPassword()),
         GetPage(name: "/updatePassword", page: () => updatePassword()),
+        GetPage(name: "/message", page: () => message()),
       ],
     );
   }
