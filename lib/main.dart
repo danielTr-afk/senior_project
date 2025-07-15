@@ -1,3 +1,4 @@
+import 'package:f_book2/view/Books/BookDetails/BookDetailsPage.dart';
 import 'package:f_book2/view/Message/ChatPage.dart';
 import 'package:f_book2/view/userProfile/ProfilePage.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/homePage",
+      initialRoute: "/booksCategories",
       getPages: [
         GetPage(name: "/splashScreen", page: () => splashScreen()),
         GetPage(name: "/onBoarding", page: () => onBoarding()),
@@ -46,8 +47,12 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/message", page: () => message()),
         GetPage(name: "/ChatPage", page: () => ChatPage()),
         GetPage(name: "/ProfilePage", page: () => ProfilePage()),
+        GetPage(name: "/BookDetailsPage", page: () => BookDetailsPage()),
+
       ],
     );
   }
 }
+
+
 
