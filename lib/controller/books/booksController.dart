@@ -15,7 +15,7 @@ class BooksController extends GetxController {
   Future<void> fetchBooks() async {
     isLoading.value = true;
     try {
-      final response = await http.get(Uri.parse('http://10.0.2.2/f-book/book.php'));
+      final response = await http.get(Uri.parse('http://10.0.2.2/BookFlix/book.php'));
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);

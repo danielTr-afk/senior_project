@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../controller/variables.dart';
+import '../../../controller/variables.dart';
 
 class ChatInputField extends StatelessWidget {
   @override

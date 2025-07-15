@@ -48,7 +48,7 @@ class bfCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Image.asset(image, fit: BoxFit.cover, height: 200, width: 150),
+            Image.network(image, fit: BoxFit.cover, height: 200, width: 150),
             styleText(
               text: text,
               fSize: 20,

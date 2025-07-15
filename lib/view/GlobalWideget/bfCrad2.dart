@@ -16,7 +16,7 @@ class bfCard2 extends StatelessWidget {
         height: 300,
         width: 200,
         child: Flexible(
-          child: Image.asset(
+          child: Image.network(
             image,
             fit: BoxFit.cover,
           ),

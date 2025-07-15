@@ -1,6 +1,6 @@
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
-import 'package:f_book2/view/Message/ChatInputField.dart';
+import 'package:f_book2/view/Message/messageWideget/ChatInputField.dart';
 import 'package:flutter/material.dart';
 
 class message extends StatelessWidget {

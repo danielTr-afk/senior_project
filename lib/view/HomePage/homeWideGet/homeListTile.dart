@@ -25,7 +25,7 @@ class homeListTile extends StatelessWidget {
           ),
           title: styleText(text: text, fSize: 23, color: textColor1),
           onTap: () {
-            Get.offAllNamed(onTap);
+            Get.toNamed(onTap);
           },
           selectedColor: secondaryColor,
           tileColor: textColor1,

@@ -20,7 +20,7 @@ class listForm extends StatelessWidget {
           onTap: (){
             Get.offAll(nav);
           },
-          leading: Image(image: AssetImage(image)),
+          leading: Image.network(image),
           title: styleText(text: title, fSize: 30, color: textColor2, fontWeight: FontWeight.bold,),
           subtitle: styleText(text: "$subtitle. \nNumber of like $numLike", fSize: 20, color: mainColor2!,),
           trailing: Icon(Icons.navigate_next, size: 40, color: textColor2,),

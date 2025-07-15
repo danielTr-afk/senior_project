@@ -25,7 +25,7 @@ class signUpGetx extends GetxController {
   Future<void> signup(String name, String email, String password) async {
     isloading.value = true;
 
-    final url = Uri.parse("http://10.0.2.2/f-book/signup.php");
+    final url = Uri.parse("http://10.0.2.2/BookFlix/signup.php");
 
     try {
       final response = await http.post(url,

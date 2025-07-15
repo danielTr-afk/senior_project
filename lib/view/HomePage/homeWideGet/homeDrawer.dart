@@ -60,7 +60,7 @@ class homeDrawer extends StatelessWidget {
                 SizedBox(
                   height: 20,
                 ),
-                homeListTile(icon: Icons.person, text: "Profile", onTap: ''),
+                homeListTile(icon: Icons.person, text: "Profile", onTap: '/ProfilePage'),
                 homeListTile(icon: Icons.settings, text: "Settings", onTap: ''),
                 homeListTile(
                     icon: Icons.arrow_right_alt,

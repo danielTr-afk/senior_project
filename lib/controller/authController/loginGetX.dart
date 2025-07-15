@@ -30,10 +30,14 @@ class loginGetx extends GetxController {
   Future<void> login(String email, String password) async {
     isLoading.value = true;
 
-    final url = Uri.parse("http://10.0.2.2/f-book/login.php");
+    final url = Uri.parse("http://10.0.2.2/BookFlix/login.php");
 
     try {
-      final response = await http.post(url, body: jsonEncode({
+      final response = await http.post(url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },body: jsonEncode({
         "email": email,
         "password": password,
       }));

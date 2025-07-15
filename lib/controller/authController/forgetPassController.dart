@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -6,36 +7,32 @@ import 'package:http/http.dart' as http;
 class forgetPassController extends GetxController {
   final emailController = TextEditingController();
   var isLoading = false.obs;
+  var otp = ''.obs;
+  var email = ''.obs;
 
-  Future<void> sendEmailForOTP() async {
-    final email = emailController.text.trim();
-
-    if (email.isEmpty) {
-      Get.snackbar('Error', 'Email is required');
+  void sendOtp() async {
+    final enteredEmail = emailController.text;
+    if (enteredEmail.isEmpty) {
+      Get.snackbar("Error", "Email required");
       return;
     }
 
     isLoading.value = true;
 
-    final url = Uri.parse('http://10.0.2.2/f-book/forgot_password.php'); // Adjust this
     final response = await http.post(
-      url,
-      body: {'email': email},
-      headers: {'Accept': 'application/json'},
+      Uri.parse("http://10.0.2.2/BookFlix/send_otp.php"),
+      body: {'email': enteredEmail},
     );
 
+    final data = jsonDecode(response.body);
     isLoading.value = false;
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['success']) {
-        Get.snackbar('Success', data['message']);
-        Get.toNamed('/otp'); // Navigate to OTP screen
-      } else {
-        Get.snackbar('Error', data['message']);
-      }
+    if (data['success'] == true) {
+      otp.value = data['otp'].toString();
+      email.value = data['email'].toString();
+      Get.toNamed('/otp');
     } else {
-      Get.snackbar('Error', 'Server error. Please try again later.');
+      Get.snackbar("Error", data['message']);
     }
   }
 }

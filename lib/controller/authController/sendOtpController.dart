@@ -19,7 +19,7 @@ class sendOtpController extends GetxController {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2/f-book/send_otp.php'),
+        Uri.parse('http://10.0.2.2/BookFlix/send_otp.php'),
         body: {'email': email},
         headers: {'Accept': 'application/json'},
       );

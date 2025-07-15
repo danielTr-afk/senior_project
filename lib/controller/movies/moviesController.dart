@@ -17,7 +17,7 @@ class moviesController extends GetxController {
   void fetchMovies() async {
     try {
       isLoading(true);
-      var response = await http.get(Uri.parse('http://10.0.2.2/f-book/film.php'));
+      var response = await http.get(Uri.parse('http://10.0.2.2/BookFlix/film.php'));
 
       if (response.statusCode == 200) {
         var jsonData = json.decode(response.body);
