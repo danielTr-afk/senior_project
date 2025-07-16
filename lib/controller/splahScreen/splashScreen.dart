@@ -124,8 +124,9 @@ class _splashScreenState extends State<splashScreen>
                           child: Text(
                             text[i],
                             style: TextStyle(
-                              fontSize: 52,
+                              fontSize: 65,
                               fontWeight: FontWeight.bold,
+                              fontFamily: "GentiumBookPlus",
                               color: textColor,
                               shadows: [
                                 Shadow(
