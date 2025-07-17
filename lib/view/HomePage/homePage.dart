@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/authController/loginGetX.dart';
 import '../../controller/books/booksController.dart';
+import '../../controller/movies/moviesController.dart'; // Add this import
 import '../../controller/variables.dart';
 import '../GlobalWideget/styleText.dart';
 import 'homeWideGet/bfCard.dart';
@@ -13,6 +14,7 @@ class homePage extends StatelessWidget {
   homePage({super.key});
 
   final controller = Get.put(BooksController());
+  final movieController = Get.put(moviesController());
   final loginController = Get.find<loginGetx>();
 
   @override
@@ -71,11 +73,11 @@ class homePage extends StatelessWidget {
                                   ),
                                   SizedBox(width: 15),
                                   Obx(() => styleText(
-                                        text:
-                                            "Welcome Back \n${loginController.userName.value}",
-                                        fSize: 18,
-                                        color: secondaryColor,
-                                      ))
+                                    text:
+                                    "Welcome Back \n${loginController.userName.value}",
+                                    fSize: 18,
+                                    color: secondaryColor,
+                                  ))
                                 ],
                               ),
                               titleSection(
@@ -94,50 +96,41 @@ class homePage extends StatelessWidget {
                             color: mainColor),
                         SizedBox(
                           height: 320,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              bfCard(
-                                image:
-                                    "images/onBoardingImage/onboardingphoto2.png",
-                                text: "Sherlock Holmes",
-                                onTap: () {},
-                                borderColor: mainColor,
-                                titleColor: mainColor,
-                                coverColor: textColor2,
-                                isBook: false,
-                                description: 'joey',
-                                descriptionColor: mainColor,
-                                routePage: '',
-                              ),
-                              bfCard(
-                                image:
-                                    "images/onBoardingImage/onboardingphoto2.png",
-                                text: "Sherlock Holmes",
-                                onTap: () {},
-                                borderColor: mainColor,
-                                titleColor: mainColor,
-                                coverColor: textColor2,
-                                isBook: false,
-                                description: 'joey',
-                                descriptionColor: mainColor,
-                                routePage: '',
-                              ),
-                              bfCard(
-                                image:
-                                    "images/onBoardingImage/onboardingphoto2.png",
-                                text: "Sherlock Holmes",
-                                onTap: () {},
-                                borderColor: mainColor,
-                                titleColor: mainColor,
-                                coverColor: textColor2,
-                                isBook: false,
-                                description: 'joey',
-                                descriptionColor: mainColor,
-                                routePage: '',
-                              ),
-                            ],
-                          ),
+                          child: Obx(() {
+                            if (movieController.isLoading.value) {
+                              return Center(child: CircularProgressIndicator());
+                            }
+                            if (movieController.movies.isEmpty) {
+                              return Center(
+                                child: styleText(
+                                  text: "No movies available",
+                                  fSize: 16,
+                                  color: mainColor,
+                                ),
+                              );
+                            }
+                            return ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: movieController.movies.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                var movie = movieController.movies[index];
+                                return bfCard(
+                                  image: movie['image'] ?? "images/onBoardingImage/onboardingphoto2.png",
+                                  text: movie['title'] ?? "Unknown Title",
+                                  onTap: () {
+                                    // Add navigation to movie detail page if needed
+                                  },
+                                  borderColor: mainColor,
+                                  titleColor: mainColor,
+                                  coverColor: textColor2,
+                                  isBook: false,
+                                  description: movie['category'] ?? 'Unknown Category',
+                                  descriptionColor: mainColor,
+                                  routePage: '',
+                                );
+                              },
+                            );
+                          }),
                         ),
                         SizedBox(height: 100),
                         // Leave space above BottomNavigationBar

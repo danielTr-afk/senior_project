@@ -32,7 +32,7 @@ class homeDrawer extends StatelessWidget {
                 CircleAvatar(
                   backgroundColor: mainColor,
                   backgroundImage:
-                      AssetImage("images/onBoardingImage/onboardingphoto1.png"),
+                  NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
                   radius: MediaQuery.of(context).size.width * 0.25,
                 ),
                 IconButton(onPressed: (){

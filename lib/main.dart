@@ -1,6 +1,8 @@
 import 'package:f_book2/view/Books/BookDetails/BookDetailsPage.dart';
 import 'package:f_book2/view/Message/ChatPage.dart';
 import 'package:f_book2/view/Movies/MovieDetails/MovieDetailsPage.dart';
+import 'package:f_book2/view/contract/AcceptContractPage.dart';
+import 'package:f_book2/view/contract/createContract.dart';
 import 'package:f_book2/view/setting/settingPage.dart';
 import 'package:f_book2/view/userProfile/ProfilePage.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +34,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/settingsPage",
+      initialRoute: "/createContract",
       getPages: [
         GetPage(name: "/splashScreen", page: () => splashScreen()),
         GetPage(name: "/onBoarding", page: () => onBoarding()),
@@ -52,11 +54,15 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/BookDetailsPage", page: () => BookDetailsPage()),
         GetPage(name: "/MovieDetailsPage", page: () => MovieDetailsPage()),
         GetPage(name: "/settingsPage", page: () => settingsPage()),
+        GetPage(name: "/AcceptContractPage", page: () => AcceptContractPage()),
+        GetPage(name: "/createContract", page: () => createContract()),
 
       ],
     );
   }
 }
+
+
 
 
 
