@@ -1,6 +1,7 @@
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/HomePage/homeWideGet/homeBottomNav.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
@@ -73,8 +74,10 @@ class ChatPage extends StatelessWidget {
         title: Text("Chats", style: TextStyle(fontSize: 24, color: textColor2)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle, size: 30, color: Colors.red),
-            onPressed: () {},
+            icon: Icon(Icons.add_circle, size: 30, color: secondaryColor),
+            onPressed: () {
+              Get.toNamed('/usersPage');
+            },
           ),
         ],
         backgroundColor: blackColor2,

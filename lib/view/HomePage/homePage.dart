@@ -124,7 +124,7 @@ class homePage extends StatelessWidget {
                                   titleColor: mainColor,
                                   coverColor: textColor2,
                                   isBook: false,
-                                  description: movie['category'] ?? 'Unknown Category',
+                                  description: movie[''] ?? 'Unknown Category',
                                   descriptionColor: mainColor,
                                   routePage: '',
                                 );
