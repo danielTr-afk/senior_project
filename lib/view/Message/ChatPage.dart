@@ -1,65 +1,17 @@
 import 'package:f_book2/controller/variables.dart';
+import 'package:f_book2/controller/message/ChatController.dart';
 import 'package:f_book2/view/HomePage/homeWideGet/homeBottomNav.dart';
+import 'package:f_book2/view/Message/message.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
 
-  final List<Map<String, dynamic>> chats = const [
-    {
-      "name": "Sara Sanders",
-      "message": "Can you buy me dinner?",
-      "time": "12:35",
-      "unread": "100",
-      "avatar": "https://randomuser.me/api/portraits/women/1.jpg"
-    },
-    {
-      "name": "Doris Diaz",
-      "message": "Read this article, it is so awesome..",
-      "time": "12:35",
-      "unread": "99+",
-      "avatar": "https://randomuser.me/api/portraits/women/2.jpg"
-    },
-    {
-      "name": "Dorothy Oliver",
-      "message": "Where you at? I'm here.",
-      "time": "12:35",
-      "unread": "3",
-      "avatar": "https://randomuser.me/api/portraits/women/3.jpg"
-    },
-    {
-      "name": "Rebecca Fox",
-      "message": "What do you need?",
-      "time": "12:35",
-      "unread": "",
-      "avatar": "https://randomuser.me/api/portraits/women/4.jpg"
-    },
-    {
-      "name": "Louisa McCoy",
-      "message": "Read this article, it is so sad... awesome..",
-      "time": "12:35",
-      "unread": "",
-      "avatar": "https://randomuser.me/api/portraits/women/5.jpg"
-    },
-    {
-      "name": "Jasmine Freeman",
-      "message": "Are you sure?",
-      "time": "12:35",
-      "unread": "",
-      "avatar": "https://randomuser.me/api/portraits/women/6.jpg"
-    },
-    {
-      "name": "Marie Lucas",
-      "message": "I know that.",
-      "time": "12:35",
-      "unread": "",
-      "avatar": "https://randomuser.me/api/portraits/women/7.jpg"
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final ChatController chatController = Get.put(ChatController());
+
     return Scaffold(
       backgroundColor: blackColor2,
       appBar: AppBar(
@@ -107,55 +59,102 @@ class ChatPage extends StatelessWidget {
 
           // Chat List
           Expanded(
-            child: ListView.builder(
-              itemCount: chats.length,
-              itemBuilder: (context, index) {
-                final chat = chats[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(chat['avatar']),
-                    radius: 25,
+            child: Obx(() {
+              if (chatController.isLoading.value) {
+                return Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
                   ),
-                  title: Text(
-                    chat['name'],
-                    style: TextStyle(fontWeight: FontWeight.bold, color: textColor2),
-                  ),
-                  subtitle: Text(
-                    chat['message'],
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: TextStyle(color: mainColor2),
-                  ),
-                  trailing: Column(
+                );
+              }
+
+              if (chatController.conversations.isEmpty) {
+                return Center(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(chat['time']),
-                      if (chat['unread'] != "")
-                        Container(
-                          margin: const EdgeInsets.only(top: 5),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 2, horizontal: 6),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            chat['unread'],
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                          ),
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 80,
+                        color: mainColor2,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        'No conversations yet',
+                        style: TextStyle(
+                          color: mainColor2,
+                          fontSize: 18,
                         ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Start a new conversation by tapping the + button',
+                        style: TextStyle(
+                          color: mainColor2,
+                          fontSize: 14,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 );
-              },
-            ),
+              }
+
+              return ListView.builder(
+                itemCount: chatController.conversations.length,
+                itemBuilder: (context, index) {
+                  final conversation = chatController.conversations[index];
+                  final partner = conversation['partner'];
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: secondaryColor,
+                      child: Text(
+                        partner['name'] != null && partner['name'].toString().isNotEmpty
+                            ? partner['name'].toString()[0].toUpperCase()
+                            : '?',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      partner['name'] ?? 'Unknown User',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: textColor2,
+                      ),
+                    ),
+                    subtitle: Text(
+                      conversation['last_message'] ?? 'No messages yet',
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: TextStyle(color: mainColor2),
+                    ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          chatController.formatTime(conversation['last_message_time']),
+                          style: TextStyle(
+                            color: mainColor2,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      // Navigate to message page with conversation data
+                      Get.to(() => message(), arguments: conversation);
+                    },
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),
-
       bottomNavigationBar: homeBottomNav(index: 3),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:f_book2/controller/variables.dart';
+import 'package:f_book2/controller/message/ChatController.dart';
 import 'package:f_book2/view/HomePage/homeWideGet/homeBottomNav.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +9,118 @@ import '../../controller/message/usersController.dart';
 class usersPage extends StatelessWidget {
   usersPage({super.key});
 
-  usersController UsersController = Get.put(usersController());
+  final usersController UsersController = Get.put(usersController());
+  final ChatController chatController = Get.find<ChatController>();
+
+  void _showStartConversationDialog(Map<String, dynamic> user) {
+    final TextEditingController messageController = TextEditingController();
+
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: mainColor,
+        title: Text(
+          'Start Conversation',
+          style: TextStyle(color: textColor2),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Send a message to ${user['name']}',
+              style: TextStyle(color: mainColor2),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: messageController,
+              style: TextStyle(color: textColor2),
+              decoration: InputDecoration(
+                hintText: 'Type your message...',
+                hintStyle: TextStyle(color: mainColor2),
+                filled: true,
+                fillColor: blackColor2,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: EdgeInsets.all(12),
+              ),
+              maxLines: 3,
+              minLines: 1,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: mainColor2),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (messageController.text.trim().isNotEmpty) {
+                Get.back(); // Close dialog
+
+                // Show loading
+                Get.dialog(
+                  Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
+                    ),
+                  ),
+                  barrierDismissible: false,
+                );
+
+                // Start conversation
+                final success = await chatController.startNewConversation(
+                  user['id'],
+                  messageController.text.trim(),
+                );
+
+                Get.back(); // Close loading dialog
+
+                if (success) {
+                  Get.snackbar(
+                    'Success',
+                    'Conversation started with ${user['name']}',
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                  Get.back(); // Go back to chat page
+                } else {
+                  Get.snackbar(
+                    'Error',
+                    'Failed to start conversation',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                }
+              } else {
+                Get.snackbar(
+                  'Error',
+                  'Please enter a message',
+                  backgroundColor: Colors.orange,
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: secondaryColor,
+            ),
+            child: Text(
+              'Send',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +156,7 @@ class usersPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: TextFormField(
-              controller: UsersController.searchController, // Connected to controller
+              controller: UsersController.searchController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search users...',
@@ -69,88 +181,6 @@ class usersPage extends StatelessWidget {
                 return Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
-                  ),
-                );
-              }
-
-              // Show error message
-              if (UsersController.errorMessage.value.isNotEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 64,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Error loading users',
-                        style: TextStyle(
-                          color: textColor2,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        UsersController.errorMessage.value,
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          UsersController.refreshUsers();
-                        },
-                        child: Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: secondaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              // Show empty state
-              if (UsersController.filteredUsers.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.people_outline,
-                        color: mainColor2,
-                        size: 64,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        UsersController.searchController.text.isEmpty
-                            ? 'No users found'
-                            : 'No users match your search',
-                        style: TextStyle(
-                          color: textColor2,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        UsersController.searchController.text.isEmpty
-                            ? 'Check your database or network connection'
-                            : 'Try a different search term',
-                        style: TextStyle(
-                          color: mainColor2,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
                   ),
                 );
               }
@@ -190,14 +220,11 @@ class usersPage extends StatelessWidget {
                         ),
                       ),
                       trailing: Icon(
-                        Icons.chevron_right,
+                        Icons.message,
                         color: secondaryColor,
                       ),
                       onTap: () {
-                        // Handle user selection
-                        print('Selected user: ${user['name']}');
-                        // You can navigate to chat screen here
-                        // Get.to(() => ChatScreen(user: user));
+                        _showStartConversationDialog(user);
                       },
                     ),
                   );
