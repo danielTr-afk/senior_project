@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../controller/variables.dart';
 
 class MenuTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String? ontap;
 
-  const MenuTile({super.key, required this.icon, required this.title});
+  const MenuTile({super.key, required this.icon, required this.title, this.ontap});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class MenuTile extends StatelessWidget {
         trailing: Icon(Icons.arrow_forward_ios, size: 16, color: textColor2,),
         tileColor: mainColor,
         onTap: () {
-          // Navigation logic here if needed
+          Get.toNamed(ontap!);
         },
       ),
     );

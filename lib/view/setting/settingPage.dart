@@ -1,6 +1,7 @@
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'settingWideget/SettingsTile.dart';
 
 class settingsPage extends StatelessWidget {
@@ -24,6 +25,9 @@ class settingsPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
+                      IconButton(onPressed: (){
+                        Get.back();
+                      }, icon: Icon(Icons.arrow_back, color: textColor2,)),
                       styleText(text: "Setting", fSize: 30, color: textColor2, fontWeight: FontWeight.bold,),
                       const Spacer(),
                       Icon(Icons.settings, color: textColor2),

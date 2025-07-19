@@ -1,7 +1,6 @@
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/controller/message/MessageController.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
-import 'package:f_book2/view/Message/messageWideget/ChatInputField.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -63,18 +62,13 @@ class message extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: textColor2),
-            onPressed: () => messageController.loadMessages(),
-          ),
-        ],
       ),
       body: Column(
         children: [
           Expanded(
             child: Obx(() {
-              if (messageController.isLoading.value && messageController.messages.isEmpty) {
+              if (messageController.isLoading.value &&
+                  messageController.messages.isEmpty) {
                 return Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(secondaryColor),
@@ -121,15 +115,18 @@ class message extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final message = messageController.messages[index];
                   return Align(
-                    alignment: message.isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: message.isMe
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 14),
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.7,
                       ),
                       decoration: BoxDecoration(
-                        color: message.isMe ? Color(0xfff0582d) : Color(0xFF2C2C2E),
+                        color: message.isMe ? secondaryColor : blackColor2,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
@@ -154,18 +151,16 @@ class message extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          Text(
-                            message.text,
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
+                          styleText(
+                              text: message.text, fSize: 18, color: textColor2),
                           const SizedBox(height: 4),
                           Align(
-                            alignment: Alignment.bottomRight,
-                            child: Text(
-                              messageController.formatMessageTime(message.timestamp),
-                              style: TextStyle(color: Colors.grey, fontSize: 10),
-                            ),
-                          ),
+                              alignment: Alignment.bottomRight,
+                              child: styleText(
+                                  text: messageController
+                                      .formatMessageTime(message.timestamp),
+                                  fSize: 13,
+                                  color: mainColor2!)),
                         ],
                       ),
                     ),
@@ -215,33 +210,34 @@ class message extends StatelessWidget {
                 ),
                 SizedBox(width: 12),
                 Obx(() => GestureDetector(
-                  onTap: messageController.isSending.value
-                      ? null
-                      : messageController.sendMessage,
-                  child: Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: messageController.isSending.value
-                          ? Colors.grey
-                          : secondaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: messageController.isSending.value
-                        ? SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      onTap: messageController.isSending.value
+                          ? null
+                          : messageController.sendMessage,
+                      child: Container(
+                        padding: EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: messageController.isSending.value
+                              ? Colors.grey
+                              : secondaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: messageController.isSending.value
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      textColor2),
+                                ),
+                              )
+                            : Icon(
+                                Icons.send,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                       ),
-                    )
-                        : Icon(
-                      Icons.send,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-                )),
+                    )),
               ],
             ),
           ),

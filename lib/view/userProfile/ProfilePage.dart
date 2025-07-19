@@ -72,7 +72,7 @@ class ProfilePage extends StatelessWidget {
                 children: const [
                   MenuTile(icon: Icons.person, title: 'Personal Information'),
                   MenuTile(icon: Icons.favorite, title: 'Your Favourites'),
-                  MenuTile(icon: Icons.settings, title: 'Setting'),
+                  MenuTile(icon: Icons.settings, title: 'Setting', ontap: "/settingsPage",),
                   MenuTile(icon: Icons.person_pin, title: 'About Us'),
                   MenuTile(icon: Icons.question_mark, title: 'Help'),
                   MenuTile(icon: Icons.logout, title: 'Logout'),

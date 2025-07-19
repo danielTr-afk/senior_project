@@ -51,15 +51,11 @@ class ChatController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Debug print the data being sent
       final requestData = {
         'sender_email': userEmail,
         'recipient_id': recipientId,
         'message_text': firstMessage,
       };
-
-      print('Starting conversation with data: $requestData');
-      print('URL: $baseUrl/start_or_send.php');
 
       final response = await http.post(
         Uri.parse('$baseUrl/start_or_send.php'),
@@ -70,15 +66,11 @@ class ChatController extends GetxController {
         body: json.encode(requestData),
       );
 
-      print('Start conversation response status: ${response.statusCode}');
-      print('Start conversation response body: ${response.body}');
-
       if (response.statusCode == 200) {
         try {
           final data = json.decode(response.body);
           if (data['success'] == true) {
-            print('Conversation started successfully');
-            await loadConversations(); // Refresh conversations list
+            await loadConversations();
             return true;
           } else {
             print('Server returned success=false: ${data['message']}');
