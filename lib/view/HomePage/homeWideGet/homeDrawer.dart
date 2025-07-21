@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
+import 'package:path/path.dart';
+import 'package:async/async.dart';
+import 'dart:convert';
 import '../../../controller/authController/loginGetX.dart';
 import '../../../controller/variables.dart';
 import '../../GlobalWideget/styleText.dart';
@@ -11,6 +17,62 @@ class homeDrawer extends StatelessWidget {
   });
 
   final loginController = Get.find<loginGetx>();
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _uploadImage(File imageFile) async {
+    try {
+      var uri = Uri.parse("http://10.0.2.2/BookFlix/upload_profile_image.php");
+      var request = http.MultipartRequest('POST', uri);
+
+      var stream = http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+      var length = await imageFile.length();
+      var multipartFile = http.MultipartFile(
+        'profile_image',
+        stream,
+        length,
+        filename: basename(imageFile.path),
+      );
+
+      request.files.add(multipartFile);
+      request.fields['user_id'] = loginController.userId.value.toString();
+
+      var response = await request.send();
+      final respStr = await response.stream.bytesToString();
+      final result = json.decode(respStr);
+
+      if (response.statusCode == 200 && result['success'] == true) {
+        loginController.updateProfileImage(result['image_url']);
+        Get.snackbar('Success', 'Profile image updated',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
+      } else {
+        Get.snackbar('Error', result['message'] ?? 'Upload failed',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to upload image',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    }
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        await _uploadImage(File(image.path));
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick image',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +91,31 @@ class homeDrawer extends StatelessWidget {
                 SizedBox(
                   height: 20,
                 ),
-                CircleAvatar(
-                  backgroundColor: mainColor,
-                  backgroundImage:
-                  NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
-                  radius: MediaQuery.of(context).size.width * 0.25,
+                Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: mainColor,
+                      backgroundImage: loginController.profileImage.value.isNotEmpty
+                          ? NetworkImage(loginController.profileImage.value)
+                          : NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
+                      radius: MediaQuery.of(context).size.width * 0.25,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: mainColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: _pickImage,
+                          icon: Icon(Icons.photo_camera, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(onPressed: (){
-
-                }, icon: Icon(Icons.photo_camera)),
                 SizedBox(
                   height: 10,
                 ),

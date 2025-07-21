@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +8,8 @@ class loginGetx extends GetxController {
   late TextEditingController password;
   var userName = ''.obs;
   var userEmail = ''.obs;
+  var userId = 0.obs;
+  var profileImage = ''.obs;
 
   @override
   void onInit() {
@@ -38,16 +39,17 @@ class loginGetx extends GetxController {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },body: jsonEncode({
-        "email": email,
-        "password": password,
-      }));
-
+            "email": email,
+            "password": password,
+          }));
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         if (json['success'] == true) {
           userName.value = json['data']['name'];
           userEmail.value = json['data']['email'];
+          userId.value = json['data']['id'];
+          profileImage.value = json['data']['profile_image'] ?? '';
           Get.snackbar("Success", json['message']);
           Get.offAllNamed("/homePage");
         } else {
@@ -62,5 +64,8 @@ class loginGetx extends GetxController {
       isLoading.value = false;
     }
   }
-}
 
+  void updateProfileImage(String imageUrl) {
+    profileImage.value = imageUrl;
+  }
+}

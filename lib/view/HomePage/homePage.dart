@@ -66,11 +66,11 @@ class homePage extends StatelessWidget {
                                   SizedBox(
                                     width: 5,
                                   ),
-                                  CircleAvatar(
-                                    backgroundImage: AssetImage(
-                                        "images/onBoardingImage/onboardingphoto2.png"),
+                                  Obx(() => CircleAvatar(
+                                    backgroundImage: NetworkImage(loginController.profileImage.value),
                                     radius: 30,
-                                  ),
+                                  )),
+
                                   SizedBox(width: 15),
                                   Obx(() => styleText(
                                     text:

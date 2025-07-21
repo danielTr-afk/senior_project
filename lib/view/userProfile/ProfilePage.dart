@@ -3,9 +3,12 @@ import 'package:f_book2/view/userProfile/userProfileWideget/MenuTile.dart';
 import 'package:f_book2/view/userProfile/userProfileWideget/StatCard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controller/authController/loginGetX.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+   ProfilePage({super.key});
+
+  final loginController = Get.find<loginGetx>();
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +35,10 @@ class ProfilePage extends StatelessWidget {
             const SizedBox(height: 10),
 
             /// Profile photo
-            const CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/user.jpg'), // Replace with NetworkImage if needed
-            ),
+            Obx(() => CircleAvatar(
+              backgroundImage: NetworkImage(loginController.profileImage.value),
+              radius: 30,
+            )),
 
             const SizedBox(height: 10),
 

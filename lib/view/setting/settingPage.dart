@@ -2,10 +2,13 @@ import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controller/authController/loginGetX.dart';
 import 'settingWideget/SettingsTile.dart';
 
 class settingsPage extends StatelessWidget {
-  const settingsPage({super.key});
+   settingsPage({super.key});
+
+  final loginController = Get.find<loginGetx>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +39,10 @@ class settingsPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 25,
-                        backgroundImage: NetworkImage('https://randomuser.me/api/portraits/men/45.jpg'),
-                      ),
+                      Obx(() => CircleAvatar(
+                        backgroundImage: NetworkImage(loginController.profileImage.value),
+                        radius: 30,
+                      )),
                       const SizedBox(width: 10),
                       styleText(text: "Soylent Corp", fSize: 20, color: textColor2)
                     ],

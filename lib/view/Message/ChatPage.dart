@@ -5,12 +5,16 @@ import 'package:f_book2/view/Message/message.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../controller/authController/loginGetX.dart';
+
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final ChatController chatController = Get.put(ChatController());
+    final loginController = Get.find<loginGetx>();
+
 
     return Scaffold(
       backgroundColor: blackColor2,
@@ -18,10 +22,10 @@ class ChatPage extends StatelessWidget {
         leadingWidth: 80,
         leading: Padding(
           padding: const EdgeInsets.only(left: 16.0),
-          child: CircleAvatar(
-            backgroundImage:
-            NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
-          ),
+          child: Obx(() => CircleAvatar(
+            backgroundImage: NetworkImage(loginController.profileImage.value),
+            radius: 30,
+          )),
         ),
         title: Text("Chats", style: TextStyle(fontSize: 24, color: textColor2)),
         actions: [

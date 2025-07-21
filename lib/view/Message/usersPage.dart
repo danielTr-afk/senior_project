@@ -3,7 +3,7 @@ import 'package:f_book2/controller/message/ChatController.dart';
 import 'package:f_book2/view/HomePage/homeWideGet/homeBottomNav.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../controller/authController/loginGetX.dart';
 import '../../controller/message/usersController.dart';
 
 class usersPage extends StatelessWidget {
@@ -11,6 +11,8 @@ class usersPage extends StatelessWidget {
 
   final usersController UsersController = Get.put(usersController());
   final ChatController chatController = Get.find<ChatController>();
+  final loginController = Get.find<loginGetx>();
+
 
   void _showStartConversationDialog(Map<String, dynamic> user) {
     final TextEditingController messageController = TextEditingController();
@@ -138,10 +140,10 @@ class usersPage extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 16.0),
-              child: CircleAvatar(
-                backgroundImage: NetworkImage(
-                    "https://randomuser.me/api/portraits/men/1.jpg"),
-              ),
+              child: Obx(() => CircleAvatar(
+                backgroundImage: NetworkImage(loginController.profileImage.value),
+                radius: 30,
+              )),
             ),
           ],
         ),
