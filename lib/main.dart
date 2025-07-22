@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/signup",
+      initialRoute: "/login",
       getPages: [
         GetPage(name: "/splashScreen", page: () => splashScreen()),
         GetPage(name: "/onBoarding", page: () => onBoarding()),

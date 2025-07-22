@@ -140,10 +140,9 @@ class homeDrawer extends StatelessWidget {
                 ),
                 homeListTile(icon: Icons.person, text: "Profile", onTap: '/ProfilePage'),
                 homeListTile(icon: Icons.settings, text: "Settings", onTap: '/settingsPage'),
-                homeListTile(
-                    icon: Icons.arrow_right_alt,
-                    text: "Logout",
-                    onTap: '/login')
+                homeListTile(icon: Icons.menu_book, text: "Upload Book", onTap: '/addBook'),
+                homeListTile(icon: Icons.movie, text: "Upload Movie", onTap: '/addMovie'),
+                homeListTile(icon: Icons.logout, text: "Logout", onTap: '/login')
               ],
             );
           })),

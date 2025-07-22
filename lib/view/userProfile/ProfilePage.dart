@@ -1,4 +1,5 @@
 import 'package:f_book2/controller/variables.dart';
+import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:f_book2/view/userProfile/userProfileWideget/MenuTile.dart';
 import 'package:f_book2/view/userProfile/userProfileWideget/StatCard.dart';
 import 'package:flutter/material.dart';
@@ -37,16 +38,12 @@ class ProfilePage extends StatelessWidget {
             /// Profile photo
             Obx(() => CircleAvatar(
               backgroundImage: NetworkImage(loginController.profileImage.value),
-              radius: 30,
+              radius: 100,
             )),
 
             const SizedBox(height: 10),
 
-            /// Name and location
-             Text(
-              'Johan Smith',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor2),
-            ),
+             styleText(text: loginController.userName.value, fSize: 24, color: textColor2, fontWeight: FontWeight.bold,),
              Text(
               'California, USA',
               style: TextStyle(color: mainColor2),
