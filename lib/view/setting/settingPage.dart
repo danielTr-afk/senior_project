@@ -42,9 +42,10 @@ class settingsPage extends StatelessWidget {
                       Obx(() => CircleAvatar(
                         backgroundImage: NetworkImage(loginController.profileImage.value),
                         radius: 30,
-                      )),
+                      )
+                      ),
                       const SizedBox(width: 10),
-                      styleText(text: "Soylent Corp", fSize: 20, color: textColor2)
+                      styleText(text: loginController.userName.value, fSize: 20, color: textColor2, fontWeight: FontWeight.bold)
                     ],
                   ),
                 ],
@@ -69,16 +70,22 @@ class settingsPage extends StatelessWidget {
                     ],
                   ),
                   child: Column(
-                    children: const [
-                      SettingsTile(icon: Icons.notifications, title: 'Turn on notifications'),
-                      Divider(),
-                      SettingsTile(icon: Icons.phone, title: 'Change phone number'),
-                      Divider(),
-                      SettingsTile(icon: Icons.password, title: 'Change password'),
-                      Divider(),
-                      SettingsTile(icon: Icons.invert_colors_on, title: 'Change app color'),
-                      Divider(),
-                      SettingsTile(icon: Icons.logout, title: 'Logout'),
+                    children: [
+                      const SettingsTile(icon: Icons.notifications, title: 'Turn on notifications', ontap: '',),
+                      const Divider(),
+                      const SettingsTile(icon: Icons.phone, title: 'Change phone number', ontap: '',),
+                      const Divider(),
+                      const SettingsTile(icon: Icons.password, title: 'Change password', ontap: '',),
+                      const Divider(),
+                      const SettingsTile(icon: Icons.invert_colors_on, title: 'Change app color', ontap: '',),
+                      const Divider(),
+                      ListTile(
+                        leading: Icon(Icons.logout, color: secondaryColor),
+                        title: styleText(text: "Logout", fSize: 20, color: textColor2),
+                        onTap: () {
+                          Get.offAllNamed("/login");
+                        },
+                      )
                     ],
                   ),
                 ),

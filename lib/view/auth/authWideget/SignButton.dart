@@ -5,31 +5,51 @@ import '../../../controller/authController/signUpGetX.dart';
 import '../../GlobalWideget/styleText.dart';
 
 class SignButton extends StatelessWidget {
-   SignButton({
-    super.key, required this.text, required this.color,
+  SignButton({
+    super.key,
+    required this.text,
+    required this.color,
   });
 
-  // final void Function()? onPressed;
   final String text;
   final Color color;
-  signUpGetx controller = Get.put(signUpGetx());
-
+  final signUpGetx controller = Get.find<signUpGetx>();
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 0.8,
-      height: 60,
-      child: ElevatedButton(
+      height: 50, // Slightly reduced height for better proportion
+      child: Obx(
+            () => ElevatedButton(
           style: ElevatedButton.styleFrom(
-              backgroundColor: color,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8))),
-          onPressed: () {
-            controller.signup(controller.name.value.text, controller.email.value.text, controller.password.value.text);
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 2,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+          onPressed: controller.isloading.value ? null : () {
+            controller.signup();
           },
-          child: styleText(
-              text: text, fSize: 20, color: Colors.white)),
+          child: controller.isloading.value
+              ? const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          )
+              : styleText(
+            text: text,
+            fSize: 18, // Slightly reduced font size
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -57,7 +57,7 @@ class addMovieController extends GetxController {
       request.fields['title'] = movieName.value.trim();
       request.fields['category'] = selectedCategory.value.trim();
       request.fields['description'] = description.value.trim();
-      request.fields['submitted_by'] = userId.toString();
+      request.fields['director_id'] = userId.toString();
 
       // Add cover image if selected
       if (coverImage != null) {

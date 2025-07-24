@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:flutter/material.dart';
@@ -21,144 +20,153 @@ class addBook extends StatelessWidget {
       backgroundColor: mainColor,
       appBar: AppBar(
         backgroundColor: mainColor,
+        elevation: 0,
         title: styleText(
           text: "Add New Book",
-          fSize: 30,
+          fSize: 24,
           color: secondaryColor,
           fontWeight: FontWeight.bold,
         ),
+        centerTitle: true,
         leading: IconButton(
           onPressed: () => Get.back(),
           icon: Icon(Icons.arrow_back, color: textColor2),
         ),
       ),
       body: Obx(() => SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildLabel('Book Name'),
+            // Book Name Field
+            _buildSectionTitle('Book Title'),
             _buildTextField(
-              'Enter book title',
-              controller: TextEditingController(text: bookController.bookName.value),
-              onChanged: (value) => bookController.bookName.value = value, hint: 'Enter book title',
+              hint: 'Enter book title',
+              controller: bookController.bookNameController,
+              icon: Icons.title,
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 16),
-            _buildLabel('Category'),
+            // Category Dropdown
+            _buildSectionTitle('Category'),
             _buildDropdown(),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 16),
-            _buildLabel('Description'),
+            // Description Field
+            _buildSectionTitle('Description'),
             _buildTextField(
-              'Write a short description',
-              maxLines: 4,
-              controller: TextEditingController(text: bookController.description.value),
-              onChanged: (value) => bookController.description.value = value, hint: 'Write a short description',
+              hint: 'Write a short description about the book',
+              maxLines: 5,
+              controller: bookController.descriptionController,
+              icon: Icons.description,
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 16),
-            _buildLabel('Book Cover Image'),
+            // Cover Image Picker
+            _buildSectionTitle('Book Cover Image'),
             _buildFilePickerButton(
-              'Choose Image',
               isImage: true,
-              file: bookController.coverImage, text: 'Choose Image',
+              file: bookController.coverImage,
+              buttonText: 'Select Cover Image',
+              icon: Icons.image,
             ),
+            if (bookController.coverImage != null) ...[
+              const SizedBox(height: 8),
+              _buildFileInfo(bookController.coverImage!),
+            ],
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 16),
-            _buildLabel('Book PDF'),
+            // PDF Picker
+            _buildSectionTitle('Book PDF File'),
             _buildFilePickerButton(
-              'Choose PDF',
               isImage: false,
-              file: bookController.pdfFile, text: 'Choose PDF',
+              file: bookController.pdfFile,
+              buttonText: 'Select PDF File',
+              icon: Icons.picture_as_pdf,
             ),
+            if (bookController.pdfFile != null) ...[
+              const SizedBox(height: 8),
+              _buildFileInfo(bookController.pdfFile!),
+            ],
+            const SizedBox(height: 30),
 
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: bookController.isLoading.value
-                    ? null
-                    : () => bookController.submitBook(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: bookController.isLoading.value
-                    ? CircularProgressIndicator(color: textColor2)
-                    : styleText(
-                  text: "Submit Book",
-                  fSize: 25,
-                  color: textColor2,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            // Submit Button
+            _buildSubmitButton(),
           ],
         ),
       )),
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildSectionTitle(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: styleText(text: text, fSize: 25, color: textColor2),
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: styleText(
+        text: text,
+        fSize: 18,
+        color: textColor2,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
-  Widget _buildTextField(String s, {
+  Widget _buildTextField({
     required String hint,
     int maxLines = 1,
-    TextEditingController? controller,
-    Function(String)? onChanged,
+    required TextEditingController controller,
+    required IconData icon,
   }) {
     return TextField(
       maxLines: maxLines,
       controller: controller,
-      style: TextStyle(color: textColor2),
+      style: TextStyle(color: textColor2, fontSize: 16),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: mainColor2),
+        hintStyle: TextStyle(color: mainColor2!),
+        prefixIcon: Icon(icon, color: secondaryColor),
         filled: true,
         fillColor: blackColor2,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: secondaryColor!, width: 2),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
         ),
       ),
-      onChanged: onChanged,
     );
   }
 
   Widget _buildDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: mainColor2!),
+        color: blackColor2,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
+          isExpanded: true,
           value: bookController.selectedCategory.value.isEmpty
               ? null
               : bookController.selectedCategory.value,
-          dropdownColor: const Color(0xFF2C2C2C),
-          iconEnabledColor: Colors.white,
-          hint: styleText(text: "Select category", fSize: 20, color: mainColor2!),
+          dropdownColor: blackColor2,
+          icon: Icon(Icons.arrow_drop_down, color: secondaryColor),
+          iconSize: 28,
+          hint: Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: styleText(
+              text: "Select category",
+              fSize: 16,
+              color: mainColor2!,
+            ),
+          ),
           items: [
-            DropdownMenuItem(value: 'Fantasy', child: styleText(text: "Fantasy", fSize: 20, color: mainColor2!)),
-            DropdownMenuItem(value: 'Classic', child: styleText(text: "Classic", fSize: 20, color: mainColor2!)),
-            DropdownMenuItem(value: 'Science Fiction', child: styleText(text: "Science Fiction", fSize: 20, color: mainColor2!)),
-            DropdownMenuItem(value: 'Drama', child: styleText(text: "Drama", fSize: 20, color: mainColor2!)),
-            DropdownMenuItem(value: 'Romance', child: styleText(text: "Romance", fSize: 20, color: mainColor2!)),
+            _buildDropdownItem('Fantasy'),
+            _buildDropdownItem('Classic'),
+            _buildDropdownItem('Science Fiction'),
+            _buildDropdownItem('Drama'),
+            _buildDropdownItem('Romance'),
           ],
           onChanged: (value) {
             if (value != null) {
@@ -170,24 +178,44 @@ class addBook extends StatelessWidget {
     );
   }
 
-  Widget _buildFilePickerButton(String s, {
-    required String text,
+  DropdownMenuItem<String> _buildDropdownItem(String value) {
+    return DropdownMenuItem(
+      value: value,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16),
+        child: styleText(
+          text: value,
+          fSize: 16,
+          color: textColor2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilePickerButton({
     required bool isImage,
     required File? file,
+    required String buttonText,
+    required IconData icon,
   }) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
-        icon: Icon(Icons.upload_file, color: secondaryColor),
-        label: styleText(
-          text: file?.path.split('/').last ?? text,
-          fSize: 20,
-          color: textColor2,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: blackColor2,
+          foregroundColor: textColor2,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         onPressed: () async {
           try {
             if (isImage) {
-              final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+              final pickedFile = await ImagePicker().pickImage(
+                source: ImageSource.gallery,
+                imageQuality: 80,
+              );
               if (pickedFile != null) {
                 bookController.coverImage = File(pickedFile.path);
                 bookController.update();
@@ -203,16 +231,97 @@ class addBook extends StatelessWidget {
               }
             }
           } catch (e) {
-            Get.snackbar('Error', 'Failed to pick file: ${e.toString()}');
+            Get.snackbar(
+              'Error',
+              'Failed to pick file: ${e.toString()}',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
           }
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: blackColor2,
-          foregroundColor: textColor2,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: secondaryColor),
+            const SizedBox(width: 10),
+            styleText(
+              text: file?.path.split('/').last ?? buttonText,
+              fSize: 16,
+              color: textColor2,
+
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileInfo(File file) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, color: Colors.green, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: styleText(
+              text: file.path.split('/').last,
+              fSize: 14,
+              color: Colors.green,
+            ),
           ),
+          TextButton(
+            onPressed: () {
+              if (file == bookController.coverImage) {
+                bookController.coverImage = null;
+              } else {
+                bookController.pdfFile = null;
+              }
+              bookController.update();
+            },
+            child: styleText(
+              text: 'Remove',
+              fSize: 14,
+              color: Colors.redAccent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: bookController.isLoading.value
+            ? null
+            : () => bookController.submitBook(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: secondaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+        child: bookController.isLoading.value
+            ? const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: Colors.white,
+          ),
+        )
+            : styleText(
+          text: "Submit Book",
+          fSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -69,13 +69,26 @@ class ProfilePage extends StatelessWidget {
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: const [
-                  MenuTile(icon: Icons.person, title: 'Personal Information'),
-                  MenuTile(icon: Icons.favorite, title: 'Your Favourites'),
-                  MenuTile(icon: Icons.settings, title: 'Setting', ontap: "/settingsPage",),
-                  MenuTile(icon: Icons.person_pin, title: 'About Us'),
-                  MenuTile(icon: Icons.question_mark, title: 'Help'),
-                  MenuTile(icon: Icons.logout, title: 'Logout'),
+                children: [
+                  const MenuTile(icon: Icons.person, title: 'Personal Information'),
+                  const MenuTile(icon: Icons.favorite, title: 'Your Favourites'),
+                  const MenuTile(icon: Icons.settings, title: 'Setting', ontap: "/settingsPage",),
+                  const MenuTile(icon: Icons.person_pin, title: 'About Us'),
+                  const MenuTile(icon: Icons.question_mark, title: 'Help'),
+                  Card(
+                    elevation: 1,
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    child: ListTile(
+                      leading: Icon(Icons.logout, color: secondaryColor),
+                      title:  styleText(text: "Logout", fSize: 18, color: textColor2,),
+                      trailing:  Icon(Icons.arrow_forward_ios, size: 16, color: textColor2,),
+                      tileColor: mainColor,
+                      onTap: () {
+                        Get.offAllNamed("/login");
+                      },
+                    ),
+                  )
                 ],
               ),
             ),

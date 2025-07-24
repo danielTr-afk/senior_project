@@ -1,11 +1,9 @@
-// controllers/book_controller.dart
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
-import 'package:async/async.dart';
 import 'dart:convert';
-
 import '../authController/loginGetX.dart';
 
 class addBookController extends GetxController {
@@ -14,6 +12,9 @@ class addBookController extends GetxController {
   var bookName = ''.obs;
   var description = ''.obs;
 
+  final TextEditingController bookNameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
   File? coverImage;
   File? pdfFile;
 
@@ -21,7 +22,20 @@ class addBookController extends GetxController {
     selectedCategory.value = category;
   }
 
-  // Update the submitBook method in book_controller.dart
+  @override
+  void onInit() {
+    super.onInit();
+    bookNameController.addListener(() => bookName.value = bookNameController.text);
+    descriptionController.addListener(() => description.value = descriptionController.text);
+  }
+
+  @override
+  void onClose() {
+    bookNameController.dispose();
+    descriptionController.dispose();
+    super.onClose();
+  }
+
   Future<void> submitBook() async {
     final authController = Get.find<loginGetx>();
     final userId = authController.userId.value;
@@ -44,61 +58,98 @@ class addBookController extends GetxController {
         Uri.parse('http://10.0.2.2/BookFlix/add_book.php'),
       );
 
-      // Add all required fields
-      request.fields['title'] = bookName.value;
-      request.fields['category'] = selectedCategory.value;
-      request.fields['description'] = description.value;
-      request.fields['submitted_by'] = userId.toString();  // Use the logged-in user's ID
+      // Add text fields
+      request.fields.addAll({
+        'title': bookName.value.trim(),
+        'category': selectedCategory.value,
+        'description': description.value.trim(),
+        'author_id': userId.toString(),
+        'price': '0.00',
+      });
 
-      // Add image file if selected
+      // Add files
       if (coverImage != null) {
-        var stream = http.ByteStream(DelegatingStream.typed(coverImage!.openRead()));
-        var length = await coverImage!.length();
-        var multipartFile = http.MultipartFile(
+        var imageStream = http.ByteStream(coverImage!.openRead());
+        var imageLength = await coverImage!.length();
+        var imageFile = http.MultipartFile(
           'image',
-          stream,
-          length,
+          imageStream,
+          imageLength,
           filename: basename(coverImage!.path),
         );
-        request.files.add(multipartFile);
+        request.files.add(imageFile);
       }
 
-      // Add PDF file if selected
       if (pdfFile != null) {
-        var stream = http.ByteStream(DelegatingStream.typed(pdfFile!.openRead()));
-        var length = await pdfFile!.length();
-        var multipartFile = http.MultipartFile(
+        var pdfStream = http.ByteStream(pdfFile!.openRead());
+        var pdfLength = await pdfFile!.length();
+        var pdfMultipartFile = http.MultipartFile(
           'pdf',
-          stream,
-          length,
+          pdfStream,
+          pdfLength,
           filename: basename(pdfFile!.path),
         );
-        request.files.add(multipartFile);
+        request.files.add(pdfMultipartFile);
       }
+
+      print('Sending request to: ${request.url}');
+      print('Request fields: ${request.fields}');
+      print('Request files: ${request.files.map((f) => f.field + ': ' + (f.filename ?? 'no filename')).toList()}');
 
       var response = await request.send();
-      var responseData = await response.stream.bytesToString();
-      print('Raw server response: $responseData'); // Debugging
+      var responseString = await response.stream.bytesToString();
+
+      print('Response status: ${response.statusCode}');
+      print('Raw server response: "$responseString"');
 
       if (response.statusCode == 200) {
-        var result = json.decode(responseData);
-        if (result['success'] == true) {
-          Get.back();
-          Get.snackbar('Success', result['message'] ?? 'Book submitted for approval');
-        } else {
-          Get.snackbar('Error', result['message'] ?? 'Submission failed');
-          if (result['errors'] != null) {
-            // Show detailed validation errors if available
-            result['errors'].forEach((field, error) {
-              Get.snackbar('Validation Error', '$field: $error');
-            });
+        // Check if response starts with valid JSON
+        if (responseString.trim().startsWith('{')) {
+          try {
+            final responseJson = json.decode(responseString) as Map<String, dynamic>;
+
+            if (responseJson['success'] == true) {
+              // Clear form
+              bookNameController.clear();
+              descriptionController.clear();
+              selectedCategory.value = '';
+              coverImage = null;
+              pdfFile = null;
+              update();
+
+              Get.back();
+              Get.snackbar(
+                'Success',
+                responseJson['message'] ?? 'Book added successfully',
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+                duration: Duration(seconds: 3),
+              );
+            } else {
+              throw Exception(responseJson['message'] ?? 'Submission failed');
+            }
+          } catch (jsonError) {
+            print('JSON decode error: $jsonError');
+            throw Exception('Server returned invalid JSON response');
           }
+        } else {
+          print('Response does not start with JSON: ${responseString.substring(0, responseString.length > 100 ? 100 : responseString.length)}');
+          throw Exception('Server returned non-JSON response. Check server logs.');
         }
       } else {
-        Get.snackbar('Error', 'Server returned status code ${response.statusCode}');
+        throw Exception('Server error: ${response.statusCode} - ${response.reasonPhrase}');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to submit book: ${e.toString()}');
+      print('Error in submitBook: $e');
+      Get.snackbar(
+        'Error',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        duration: Duration(seconds: 5),
+      );
     } finally {
       isLoading.value = false;
     }

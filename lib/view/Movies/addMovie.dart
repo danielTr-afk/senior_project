@@ -1,18 +1,16 @@
 import 'dart:io';
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../controller/movies/addMovieController.dart';
 
 class addMovie extends StatelessWidget {
   addMovie({super.key});
 
   final addMovieController movieController = Get.put(addMovieController());
-
-  // Add TextEditingControllers to properly manage text input
   final TextEditingController movieNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
 
@@ -22,19 +20,21 @@ class addMovie extends StatelessWidget {
       backgroundColor: mainColor,
       appBar: AppBar(
         backgroundColor: mainColor,
+        elevation: 0,
         title: styleText(
           text: "Add New Movie",
-          fSize: 30,
+          fSize: 24,
           color: secondaryColor,
           fontWeight: FontWeight.bold,
         ),
+        centerTitle: true,
         leading: IconButton(
           onPressed: () => Get.back(),
           icon: Icon(Icons.arrow_back, color: textColor2),
         ),
       ),
       body: Obx(() => SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -45,86 +45,60 @@ class addMovie extends StatelessWidget {
               onChanged: (value) => movieController.movieName.value = value,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildLabel('Category'),
             _buildDropdown(),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildLabel('Description'),
             _buildTextField(
               'Write a short description',
               controller: descriptionController,
-              maxLines: 4,
+              maxLines: 5,
               onChanged: (value) => movieController.description.value = value,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildLabel('Movie Cover Image'),
             _buildFilePickerButton(
               'Choose Image',
               isImage: true,
-              file: movieController.coverImage, text: 'Choose Image',
+              file: movieController.coverImage,
+              text: 'Choose Image',
             ),
+            if (movieController.coverImage != null) ...[
+              const SizedBox(height: 8),
+              _buildFileInfo(movieController.coverImage!),
+            ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildLabel('Trailer'),
             _buildFilePickerButton(
               'Choose Trailer File',
               isVideo: true,
-              file: movieController.trailerFile, text: 'Choose Trailer File',
+              file: movieController.trailerFile,
+              text: 'Choose Trailer File',
             ),
+            if (movieController.trailerFile != null) ...[
+              const SizedBox(height: 8),
+              _buildFileInfo(movieController.trailerFile!),
+            ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             _buildLabel('Full Movie File'),
             _buildFilePickerButton(
               'Choose Movie File',
               isVideo: true,
-              file: movieController.movieFile, text: 'Choose Movie File',
+              file: movieController.movieFile,
+              text: 'Choose Movie File',
             ),
+            if (movieController.movieFile != null) ...[
+              const SizedBox(height: 8),
+              _buildFileInfo(movieController.movieFile!),
+            ],
 
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: movieController.isLoading.value
-                    ? null
-                    : () => movieController.submitMovie(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: secondaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: movieController.isLoading.value
-                    ? CircularProgressIndicator(color: textColor2)
-                    : styleText(
-                  text: "Submit Movie",
-                  fSize: 25,
-                  color: textColor2,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-
-            // Debug section - remove this in production
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  styleText(text: "Debug Info:", fSize: 16, color: Colors.red),
-                  Text("Movie Name: '${movieController.movieName.value}'", style: TextStyle(color: Colors.white)),
-                  Text("Category: '${movieController.selectedCategory.value}'", style: TextStyle(color: Colors.white)),
-                  Text("Description: '${movieController.description.value}'", style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            ),
+            const SizedBox(height: 30),
+            _buildSubmitButton(),
           ],
         ),
       )),
@@ -133,8 +107,13 @@ class addMovie extends StatelessWidget {
 
   Widget _buildLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: styleText(text: text, fSize: 25, color: textColor2),
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: styleText(
+        text: text,
+        fSize: 18,
+        color: textColor2,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
@@ -143,22 +122,23 @@ class addMovie extends StatelessWidget {
     required Function(String value) onChanged,
     TextEditingController? controller,
   }) {
-    return TextFormField(
+    return TextField(
       controller: controller,
       maxLines: maxLines,
-      style: TextStyle(color: textColor2),
+      style: TextStyle(color: textColor2, fontSize: 16),
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: mainColor2),
+        hintStyle: TextStyle(color: mainColor2!),
         filled: true,
         fillColor: blackColor2,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: secondaryColor!, width: 2),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
         ),
       ),
     );
@@ -166,11 +146,9 @@ class addMovie extends StatelessWidget {
 
   Widget _buildDropdown() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: mainColor2!),
+        color: blackColor2,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -178,13 +156,30 @@ class addMovie extends StatelessWidget {
           value: movieController.selectedCategory.value.isEmpty
               ? null
               : movieController.selectedCategory.value,
-          hint: styleText(text: "Select category", fSize: 20, color: mainColor2!),
+          dropdownColor: blackColor2,
+          icon: Icon(Icons.arrow_drop_down, color: secondaryColor),
+          iconSize: 28,
+          hint: Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: styleText(
+              text: "Select category",
+              fSize: 16,
+              color: mainColor2!,
+            ),
+          ),
           items: [
             'Action', 'Drama', 'Thriller', 'Romance', 'Documentary'
           ].map((String value) {
             return DropdownMenuItem<String>(
               value: value,
-              child: styleText(text: value, fSize: 20, color: mainColor2!),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: styleText(
+                  text: value,
+                  fSize: 16,
+                  color: textColor2,
+                ),
+              ),
             );
           }).toList(),
           onChanged: (String? value) {
@@ -205,12 +200,14 @@ class addMovie extends StatelessWidget {
   }) {
     return SizedBox(
       width: double.infinity,
-      child: ElevatedButton.icon(
-        icon: Icon(Icons.upload_file, color: secondaryColor),
-        label: styleText(
-          text: file?.path.split('/').last ?? text,
-          fSize: 20,
-          color: textColor2,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: blackColor2,
+          foregroundColor: textColor2,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         onPressed: () async {
           try {
@@ -221,13 +218,11 @@ class addMovie extends StatelessWidget {
                 movieController.update();
               }
             } else if (isVideo) {
-              // Try using FileType.video first
               FilePickerResult? pickedFile = await FilePicker.platform.pickFiles(
                 type: FileType.video,
                 allowMultiple: false,
               );
 
-              // If that doesn't work, fallback to any file type
               if (pickedFile == null) {
                 pickedFile = await FilePicker.platform.pickFiles(
                   type: FileType.any,
@@ -239,7 +234,6 @@ class addMovie extends StatelessWidget {
                 final filePath = pickedFile.files.single.path!;
                 final fileName = pickedFile.files.single.name.toLowerCase();
 
-                // Check if it's a video file
                 if (fileName.endsWith('.mp4') ||
                     fileName.endsWith('.mov') ||
                     fileName.endsWith('.avi') ||
@@ -251,7 +245,6 @@ class addMovie extends StatelessWidget {
                     movieController.movieFile = File(filePath);
                   }
                   movieController.update();
-                  Get.snackbar('Success', 'Video file selected: ${pickedFile.files.single.name}');
                 } else {
                   Get.snackbar('Error', 'Please select a valid video file (.mp4, .mov, .avi, .mkv)');
                 }
@@ -259,16 +252,92 @@ class addMovie extends StatelessWidget {
             }
           } catch (e) {
             Get.snackbar('Error', 'Failed to pick file: ${e.toString()}');
-            print('File picker error: $e'); // Add this for debugging
           }
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: blackColor2,
-          foregroundColor: textColor2,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            Icon(Icons.upload_file, color: secondaryColor),
+            const SizedBox(width: 10),
+            Expanded(
+              child: styleText(
+                text: file?.path.split('/').last ?? text,
+                fSize: 16,
+                color: textColor2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileInfo(File file) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle, color: Colors.green, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: styleText(
+              text: file.path.split('/').last,
+              fSize: 14,
+              color: Colors.green,
+            ),
           ),
+          TextButton(
+            onPressed: () {
+              if (file == movieController.coverImage) {
+                movieController.coverImage = null;
+              } else if (file == movieController.trailerFile) {
+                movieController.trailerFile = null;
+              } else {
+                movieController.movieFile = null;
+              }
+              movieController.update();
+            },
+            child: styleText(
+              text: 'Remove',
+              fSize: 14,
+              color: Colors.redAccent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: movieController.isLoading.value
+            ? null
+            : () => movieController.submitMovie(),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: secondaryColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+        child: movieController.isLoading.value
+            ? const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: Colors.white,
+          ),
+        )
+            : styleText(
+          text: "Submit Movie",
+          fSize: 18,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

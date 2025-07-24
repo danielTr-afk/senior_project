@@ -139,10 +139,10 @@ class usersPage extends StatelessWidget {
               icon: Icon(Icons.arrow_back, color: textColor2),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 16.0),
+              padding: const EdgeInsets.only(left: 14.0),
               child: Obx(() => CircleAvatar(
                 backgroundImage: NetworkImage(loginController.profileImage.value),
-                radius: 30,
+                radius: 23,
               )),
             ),
           ],
