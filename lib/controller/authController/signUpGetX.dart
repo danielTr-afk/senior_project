@@ -65,12 +65,17 @@ class signUpGetx extends GetxController {
     isloading.value = true;
 
     try {
+      print("Sending signup request..."); // Debug log
+
       final response = await http.post(
-        Uri.parse("http://10.0.2.2/BookFlix/signup.php"),
+        Uri.parse("http://10.0.2.2/BookFlix/signnup.php"),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
         body: {
-          "name": name.text,
-          "email": email.text,
-          "phone": phone.text,
+          "name": name.text.trim(),
+          "email": email.text.trim().toLowerCase(),
+          "phone": phone.text.trim(),
           "password": password.text,
           "gender": gender.value,
           "is_author": isAuthor.value ? "1" : "0",
@@ -79,26 +84,42 @@ class signUpGetx extends GetxController {
         },
       );
 
-      final result = jsonDecode(response.body);
+      print("Response status: ${response.statusCode}"); // Debug log
+      print("Response body: ${response.body}"); // Debug log
 
       if (response.statusCode == 200) {
-        if (result['status'] == "success") {
-          Get.snackbar("Success", result['message'],
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green,
-              colorText: Colors.white);
-          Get.offAllNamed("/login");
-        } else {
-          Get.snackbar("Error", result['message'],
+        // Check if response is valid JSON
+        try {
+          final result = jsonDecode(response.body);
+
+          if (result['status'] == "success") {
+            Get.snackbar("Success", result['message'],
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green,
+                colorText: Colors.white);
+            Get.offAllNamed("/login");
+          } else {
+            Get.snackbar("Error", result['message'] ?? "Unknown error",
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.red,
+                colorText: Colors.white);
+          }
+        } catch (jsonError) {
+          print("JSON parsing error: $jsonError");
+          Get.snackbar("Error", "Server returned invalid response",
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.red,
               colorText: Colors.white);
         }
       } else {
-        throw Exception("Failed to sign up");
+        Get.snackbar("Error", "Server error: ${response.statusCode}",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
       }
     } catch (e) {
-      Get.snackbar("Error", e.toString(),
+      print("Network error: $e");
+      Get.snackbar("Error", "Network error: Please check your connection",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white);

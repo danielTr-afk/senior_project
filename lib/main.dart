@@ -1,5 +1,7 @@
+import 'package:f_book2/view/userProfile/AboutUsPage.dart';
 import 'package:f_book2/view/Books/BookDetails/BookDetailsPage.dart';
 import 'package:f_book2/view/Books/addBook.dart';
+import 'package:f_book2/view/userProfile/HelpPage.dart';
 import 'package:f_book2/view/Message/ChatPage.dart';
 import 'package:f_book2/view/Message/usersPage.dart';
 import 'package:f_book2/view/Movies/MovieDetails/MovieDetailsPage.dart';
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       initialBinding: mybindings(),
-      initialRoute: "/signup",
+      initialRoute: "/login",
       getPages: [
         GetPage(name: "/splashScreen", page: () => splashScreen()),
         GetPage(name: "/onBoarding", page: () => onBoarding()),
@@ -62,12 +64,16 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/addBook", page: () => addBook()),
         GetPage(name: "/addMovie", page: () => addMovie()),
         GetPage(name: "/usersPage", page: () => usersPage()),
+        GetPage(name: "/AboutUsPage", page: () => AboutUsPage()),
+        GetPage(name: "/HelpPage", page: () => HelpPage()),
 
 
       ],
     );
   }
 }
+
+
 
 
 

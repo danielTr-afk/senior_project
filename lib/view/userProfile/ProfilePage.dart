@@ -73,8 +73,8 @@ class ProfilePage extends StatelessWidget {
                   const MenuTile(icon: Icons.person, title: 'Personal Information'),
                   const MenuTile(icon: Icons.favorite, title: 'Your Favourites'),
                   const MenuTile(icon: Icons.settings, title: 'Setting', ontap: "/settingsPage",),
-                  const MenuTile(icon: Icons.person_pin, title: 'About Us'),
-                  const MenuTile(icon: Icons.question_mark, title: 'Help'),
+                  const MenuTile(icon: Icons.person_pin, title: 'About Us', ontap: "/AboutUsPage",),
+                  const MenuTile(icon: Icons.question_mark, title: 'Help', ontap: "/HelpPage",),
                   Card(
                     elevation: 1,
                     margin: const EdgeInsets.symmetric(vertical: 5),
