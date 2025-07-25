@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../GlobalWideget/styleText.dart';
 
 class bfCard extends StatelessWidget {
@@ -13,9 +12,9 @@ class bfCard extends StatelessWidget {
   final Color descriptionColor;
   final bool isBook;
   final String routePage;
-  late final String description;
+  final String description;
 
-  bfCard({
+  const bfCard({
     super.key,
     required this.image,
     required this.text,
@@ -23,42 +22,99 @@ class bfCard extends StatelessWidget {
     required this.borderColor,
     required this.titleColor,
     required this.coverColor,
-    required String description,
+    required this.description,
     required this.descriptionColor,
     required this.isBook,
     required this.routePage,
-  }) {
-    // Manually set the actual field
-    this.description = isBook ? "Written by $description" : "Inspired by $description";
-  }
+  });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        Get.offAllNamed(routePage);
-      },
+      onTap: () => Get.toNamed(routePage),
+      borderRadius: BorderRadius.circular(15),
       child: Container(
-        margin: const EdgeInsets.only(right: 20),
-        padding: const EdgeInsets.all(15),
+        width: 180,
+        margin: const EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: borderColor, width: 10),
+          border: Border.all(width: 5, color: borderColor),
           color: coverColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Add this to prevent overflow
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(image, fit: BoxFit.cover, height: 200, width: 150),
-            styleText(
-              text: text,
-              fSize: 20,
-              color: titleColor,
-              textAlign: TextAlign.center,
+            // Image with fixed height
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+              child: SizedBox(
+                height: 200, // Fixed height for image
+                width: double.infinity,
+                child: Image.network(
+                  image,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: Icon(
+                        isBook ? Icons.book : Icons.movie,
+                        size: 50,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
-            styleText(
-              text: description,
-              fSize: 15,
-              color: descriptionColor,
+            // Content with padding and constrained height
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox(
+                height: 85, // Fixed height for text content
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Flexible(
+                      child: styleText(
+                        text: text,
+                        fSize: 16, // Slightly reduced font size
+                        color: titleColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Flexible(
+                      child: styleText(
+                        text: isBook
+                            ? "By ${description.isNotEmpty ? description : 'Unknown'}"
+                            : "Dir: ${description.isNotEmpty ? description : 'Unknown'}",
+                        fSize: 14,
+                        color: descriptionColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),

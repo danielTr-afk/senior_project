@@ -136,7 +136,7 @@ class usersPage extends StatelessWidget {
               onPressed: () {
                 Get.back();
               },
-              icon: Icon(Icons.arrow_back, color: textColor2),
+              icon: Icon(Icons.arrow_back_ios, color: textColor2),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 14.0),

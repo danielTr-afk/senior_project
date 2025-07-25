@@ -111,7 +111,7 @@ class homePage extends StatelessWidget {
                             }
                             return ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: movieController.movies.length,
+                              itemCount: 3,
                               itemBuilder: (BuildContext context, int index) {
                                 var movie = movieController.movies[index];
                                 return bfCard(
@@ -148,7 +148,7 @@ class homePage extends StatelessWidget {
                             }
                             return ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: controller.books.length,
+                              itemCount: 3,
                               itemBuilder: (BuildContext context, int index) {
                                 var book = controller.books[index];
                                 return bfCard(

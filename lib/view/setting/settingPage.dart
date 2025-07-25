@@ -30,7 +30,7 @@ class settingsPage extends StatelessWidget {
                     children: [
                       IconButton(onPressed: (){
                         Get.back();
-                      }, icon: Icon(Icons.arrow_back, color: textColor2,)),
+                      }, icon: Icon(Icons.arrow_back_ios, color: textColor2,)),
                       styleText(text: "Setting", fSize: 30, color: textColor2, fontWeight: FontWeight.bold,),
                       const Spacer(),
                       Icon(Icons.settings, color: textColor2),

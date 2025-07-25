@@ -30,7 +30,7 @@ class addBook extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: Icon(Icons.arrow_back, color: textColor2),
+          icon: Icon(Icons.arrow_back_ios, color: textColor2),
         ),
       ),
       body: Obx(() => SingleChildScrollView(

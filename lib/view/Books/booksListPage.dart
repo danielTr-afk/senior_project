@@ -19,14 +19,11 @@ class booksListPage extends StatelessWidget {
       appBar: AppBar(
         title: styleText(text: "Books", fSize: 30, color: secondaryColor, fontWeight: FontWeight.bold,),
         backgroundColor: mainColor,
-        leading: Builder(
-          builder: (context) => IconButton(
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
+        leading: IconButton(
+            onPressed: (){
+              Get.back();
             },
-            icon: Icon(Icons.list,
-                size: 30, color: textColor2),
-          ),
+            icon: Icon(Icons.arrow_back_ios, color: textColor2,)
         ),
         actions: [
           IconButton(
@@ -37,8 +34,6 @@ class booksListPage extends StatelessWidget {
               icon: Icon(Icons.search))
         ],
       ),
-
-      drawer: homeDrawer(),
 
       body: Container(
         padding: EdgeInsets.all(15),

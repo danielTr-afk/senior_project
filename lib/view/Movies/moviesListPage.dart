@@ -24,13 +24,11 @@ class moviesListPage extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
         backgroundColor: mainColor,
-        leading: Builder(
-          builder: (context) => IconButton(
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
+        leading: IconButton(
+            onPressed: (){
+              Get.back();
             },
-            icon: Icon(Icons.list, size: 30, color: textColor2),
-          ),
+            icon: Icon(Icons.arrow_back_ios, color: textColor2,)
         ),
         actions: [
           IconButton(
@@ -42,7 +40,6 @@ class moviesListPage extends StatelessWidget {
           ),
         ],
       ),
-      drawer: homeDrawer(),
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(child: CircularProgressIndicator());

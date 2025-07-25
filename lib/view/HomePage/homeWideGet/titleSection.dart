@@ -7,7 +7,8 @@ class titleSection extends StatelessWidget {
   const titleSection({
     super.key,
     required this.text,
-    required this.onTap, required this.color,
+    required this.onTap,
+    required this.color,
   });
 
   final String text;
@@ -16,30 +17,35 @@ class titleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 20,
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              styleText(text: text, fSize: 40, color: color),
-              InkWell(
-                  onTap: () {
-                    Get.toNamed(onTap);
-                  },
-                  child: styleText(
-                      text: "see all", fSize: 20, color: secondaryColor))
-            ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          styleText(
+            text: text,
+            fSize: 28,
+            color: color,
+            fontWeight: FontWeight.bold,
           ),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-      ],
+          InkWell(
+            onTap: () => Get.toNamed(onTap),
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: secondaryColor, width: 1.5),
+              ),
+              child: styleText(
+                text: "See All",
+                fSize: 16,
+                color: secondaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
