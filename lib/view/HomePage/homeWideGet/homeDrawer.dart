@@ -9,12 +9,9 @@ import 'dart:convert';
 import '../../../controller/authController/loginGetX.dart';
 import '../../../controller/variables.dart';
 import '../../GlobalWideget/styleText.dart';
-import 'homeListTile.dart';
 
 class homeDrawer extends StatelessWidget {
-  homeDrawer({
-    super.key,
-  });
+  homeDrawer({super.key});
 
   final loginController = Get.find<loginGetx>();
   final ImagePicker _picker = ImagePicker();
@@ -74,80 +71,185 @@ class homeDrawer extends StatelessWidget {
     }
   }
 
+  Widget _buildDivider() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24.0),
+      height: 1,
+      color: secondaryColor.withOpacity(0.2),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.only(top: 40, bottom: 24),
+      decoration: BoxDecoration(
+        color: mainColor.withOpacity(0.9),
+        border: Border(
+          bottom: BorderSide(
+            color: secondaryColor.withOpacity(0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Container(
+                width: 180,
+                height: 180,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: secondaryColor.withOpacity(0.3),
+                    width: 2,
+                  ),
+                  image: DecorationImage(
+                    image: loginController.profileImage.value.isNotEmpty
+                        ? NetworkImage(loginController.profileImage.value)
+                        : const NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: mainColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: secondaryColor.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: IconButton(
+                  icon: Icon(Icons.camera_alt,
+                      size: 24,
+                      color: secondaryColor),
+                  onPressed: _pickImage,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          styleText(
+            text: loginController.userName.value,
+            fSize: 22,  // Adjusted size
+            color: textColor2,
+            fontWeight: FontWeight.bold,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 6),
+          styleText(
+            text: loginController.userEmail.value,
+            fSize: 16,  // Adjusted size
+            color: textColor2.withOpacity(0.7),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: MediaQuery.of(context).size.width * 0.6,
-      shadowColor: Colors.black,
+      width: MediaQuery.of(context).size.width * 0.75,  // Slightly wider
+      elevation: 10,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(40)),
+      ),
       child: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [mainColor, Colors.white],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight)),
-          child: Obx(() {
-            return Column(
-              children: [
-                SizedBox(
-                  height: 20,
-                ),
-                Stack(
-                  alignment: Alignment.bottomCenter,
+        decoration: BoxDecoration(
+          color: mainColor,
+          borderRadius: const BorderRadius.horizontal(right: Radius.circular(40)),
+        ),
+        child: Obx(() {
+          return Column(
+            children: [
+              _buildHeader(context),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.only(top: 8),
                   children: [
-                    CircleAvatar(
-                      backgroundColor: mainColor,
-                      backgroundImage: loginController.profileImage.value.isNotEmpty
-                          ? NetworkImage(loginController.profileImage.value)
-                          : NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
-                      radius: MediaQuery.of(context).size.width * 0.25,
+                    _buildMenuItem(
+                      icon: Icons.person_outline,
+                      text: "Profile",
+                      onTap: '/ProfilePage',
                     ),
-                    Positioned(
-                      bottom: 0,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: mainColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: _pickImage,
-                          icon: Icon(Icons.photo_camera, color: Colors.white),
-                        ),
-                      ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      icon: Icons.settings_outlined,
+                      text: "Settings",
+                      onTap: '/settingsPage',
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      icon: Icons.book_outlined,
+                      text: "Upload Book",
+                      onTap: '/addBook',
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      icon: Icons.movie_outlined,
+                      text: "Upload Movie",
+                      onTap: '/addMovie',
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      icon: Icons.assignment_outlined,
+                      text: "Create Contract",
+                      onTap: '/createContract',
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      icon: Icons.assignment_ind_outlined,
+                      text: "Contracts",
+                      onTap: '/contractsListPage',
+                    ),
+                    _buildDivider(),
+                    const Spacer(),
+                    _buildMenuItem(
+                      icon: Icons.exit_to_app_outlined,
+                      text: "Logout",
+                      onTap: '/login',
+                      isLogout: true,
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 10,
-                ),
-                styleText(
-                  text: loginController.userName.value,
-                  fSize: 30,
-                  color: textColor1,
-                  fontWeight: FontWeight.bold,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                styleText(
-                  text: loginController.userEmail.value,
-                  fSize: 17,
-                  color: textColor1,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                homeListTile(icon: Icons.person, text: "Profile", onTap: '/ProfilePage'),
-                homeListTile(icon: Icons.settings, text: "Settings", onTap: '/settingsPage'),
-                homeListTile(icon: Icons.menu_book, text: "Upload Book", onTap: '/addBook'),
-                homeListTile(icon: Icons.movie, text: "Upload Movie", onTap: '/addMovie'),
-                homeListTile(icon: Icons.contact_page, text: "Create contract", onTap: '/createContract'),
-                homeListTile(icon: Icons.contacts, text: "Contracts", onTap: '/contractsListPage'),
-                homeListTile(icon: Icons.logout, text: "Logout", onTap: '/login')
-              ],
-            );
-          })),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String text,
+    required String onTap,
+    bool isLogout = false,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),  // Increased vertical padding
+      leading: Icon(
+        icon,
+        size: 26,
+        color: secondaryColor,
+      ),
+      title: styleText(
+        text: text,
+        fSize: 17,
+        color: textColor2,
+        fontWeight: FontWeight.normal,
+      ),
+      trailing: Icon(
+        Icons.chevron_right,
+        size: 22,
+        color: secondaryColor.withOpacity(0.5),
+      ),
+      onTap: () => Get.toNamed(onTap),
     );
   }
 }

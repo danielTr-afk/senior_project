@@ -21,9 +21,9 @@ class homeListTile extends StatelessWidget {
           leading: Icon(
             icon,
             size: 23,
-            color: textColor1,
+            color: secondaryColor,
           ),
-          title: styleText(text: text, fSize: 23, color: textColor1),
+          title: styleText(text: text, fSize: 23, color: textColor2),
           onTap: () {
             Get.toNamed(onTap);
           },
