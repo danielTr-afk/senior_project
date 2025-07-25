@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
+import '../../controller/authController/loginGetX.dart';
+import '../../controller/books/booksController.dart';
+import '../../controller/contract/createContractController.dart';
 
 class createContract extends StatelessWidget {
-  createContract({super.key});
+  final CreateContractController _controller = Get.put(CreateContractController());
+  final BooksController _booksController = Get.put(BooksController());
+  final loginGetx _authController = Get.find<loginGetx>();
 
-  final TextEditingController directorController = TextEditingController();
-  final TextEditingController bookController = TextEditingController();
-  final TextEditingController filmController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
+  createContract({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,30 +28,41 @@ class createContract extends StatelessWidget {
           color: textColor2,
           fontWeight: FontWeight.bold,
         ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          color: textColor2,
+          onPressed: () => Get.back(),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const CircleAvatar(
+            Obx(() => CircleAvatar(
               radius: 45,
-              backgroundImage: NetworkImage(
-                'https://randomuser.me/api/portraits/women/44.jpg',
-              ),
-            ),
+              backgroundImage: _authController.profileImage.value.isNotEmpty
+                  ? NetworkImage(_authController.profileImage.value)
+                  : const NetworkImage('https://randomuser.me/api/portraits/women/44.jpg'),
+            )),
             const SizedBox(height: 10),
-            styleText(
-              text: "Lynne Foster",
+            Obx(() => styleText(
+              text: _authController.userName.value.isNotEmpty
+                  ? _authController.userName.value
+                  : "Lynne Foster",
               fSize: 25,
               color: textColor2,
               fontWeight: FontWeight.bold,
-            ),
-            styleText(
-              text: "Author",
+            )),
+            Obx(() => styleText(
+              text: _authController.userRole.value == 2
+                  ? "Author"
+                  : _authController.userRole.value == 3
+                  ? "Director"
+                  : "Author/Director",
               fSize: 20,
               color: mainColor2!,
-            ),
+            )),
             const SizedBox(height: 30),
             Container(
               padding: const EdgeInsets.all(10),
@@ -63,10 +79,363 @@ class createContract extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  contractInput(context, "Director", directorController, isSearch: true),
-                  contractInput(context, "Book", bookController, isSearch: true),
-                  contractInput(context, "Film", filmController, icon: Icons.movie_creation_outlined),
-                  contractInput(context, "Signed Date", dateController, isDate: true, icon: Icons.date_range_outlined),
+                  // Choose a Person field
+                  Autocomplete<Map<String, dynamic>>(
+                    displayStringForOption: (Map<String, dynamic> option) => option['name'].toString(),
+                    optionsBuilder: (TextEditingValue textEditingValue) async {
+                      if (textEditingValue.text.isEmpty) {
+                        return const Iterable<Map<String, dynamic>>.empty();
+                      }
+                      await _controller.searchUsers(textEditingValue.text);
+                      return _controller.users;
+                    },
+                    onSelected: (Map<String, dynamic> selection) {
+                      // Use the controller method to properly handle selection
+                      _controller.selectPerson(selection);
+                    },
+                    fieldViewBuilder: (BuildContext context,
+                        TextEditingController fieldController,
+                        FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted) {
+                      return Obx(() => TextFormField(
+                        controller: fieldController,
+                        focusNode: fieldFocusNode,
+                        style: TextStyle(color: textColor2, fontSize: 18),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: mainColor,
+                          labelText: "Choose a Person",
+                          labelStyle: TextStyle(
+                            color: mainColor2,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            color: secondaryColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          prefixIcon: Icon(Icons.person_search, color: secondaryColor),
+                          suffixIcon: _controller.loadingUsers.value
+                              ? const CircularProgressIndicator()
+                              : null,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: secondaryColor.withOpacity(0.3), width: 1.5),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: secondaryColor, width: 2),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ));
+                    },
+                    optionsViewBuilder: (BuildContext context,
+                        AutocompleteOnSelected<Map<String, dynamic>> onSelected,
+                        Iterable<Map<String, dynamic>> options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          child: Container(
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final Map<String, dynamic> option = options.elementAt(index);
+                                return GestureDetector(
+                                  onTap: () => onSelected(option),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    color: mainColor,
+                                    child: styleText(
+                                      text: option['name'],
+                                      fSize: 16,
+                                      color: textColor2,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Choose a Book field
+                  Autocomplete<Map<String, dynamic>>(
+                    displayStringForOption: (Map<String, dynamic> option) => option['title'].toString(),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return const Iterable<Map<String, dynamic>>.empty();
+                      }
+                      return _booksController.books.where((book) => book['title']
+                          .toString()
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase()));
+                    },
+                    onSelected: (Map<String, dynamic> selection) {
+                      // Use the controller method to properly handle selection
+                      _controller.selectBook(selection);
+                    },
+                    fieldViewBuilder: (BuildContext context,
+                        TextEditingController fieldController,
+                        FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted) {
+                      return Obx(() => TextFormField(
+                        controller: fieldController,
+                        focusNode: fieldFocusNode,
+                        style: TextStyle(color: textColor2, fontSize: 18),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: mainColor,
+                          labelText: "Choose a Book",
+                          labelStyle: TextStyle(
+                            color: mainColor2,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          floatingLabelStyle: TextStyle(
+                            color: secondaryColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          prefixIcon: Icon(Icons.menu_book_outlined, color: secondaryColor),
+                          suffixIcon: _booksController.isLoading.value
+                              ? const CircularProgressIndicator()
+                              : null,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: secondaryColor.withOpacity(0.3), width: 1.5),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: secondaryColor, width: 2),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ));
+                    },
+                    optionsViewBuilder: (BuildContext context,
+                        AutocompleteOnSelected<Map<String, dynamic>> onSelected,
+                        Iterable<Map<String, dynamic>> options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          child: Container(
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final Map<String, dynamic> option = options.elementAt(index);
+                                return GestureDetector(
+                                  onTap: () => onSelected(option),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    color: mainColor,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        styleText(
+                                          text: option['title'],
+                                          fSize: 16,
+                                          color: textColor2,
+                                        ),
+                                        styleText(
+                                          text: option['author_name'] ?? 'Unknown Author',
+                                          fSize: 14,
+                                          color: mainColor2!,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Other fields...
+                  contractInput(
+                    context,
+                    "Film Project",
+                    _controller.filmController,
+                    icon: Icons.movie_creation_outlined,
+                  ),
+                  contractInput(
+                    context,
+                    "Contract Date",
+                    _controller.dateController,
+                    isDate: true,
+                    icon: Icons.date_range_outlined,
+                  ),
+                  contractInput(
+                    context,
+                    "Expiry Date",
+                    _controller.expiryDateController,
+                    isDate: true,
+                    icon: Icons.date_range_outlined,
+                  ),
+                  contractInput(
+                    context,
+                    "Agreed Price (\$)",
+                    _controller.priceController,
+                    icon: Icons.attach_money,
+                    keyboardType: TextInputType.number,
+                  ),
+                  contractInput(
+                    context,
+                    "Royalty Percentage",
+                    _controller.royaltyController,
+                    icon: Icons.percent,
+                    keyboardType: TextInputType.number,
+                  ),
+
+                  // Additional Terms Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: TextFormField(
+                      controller: _controller.additionalTermsController,
+                      maxLines: 4,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: mainColor,
+                        labelText: "Additional Terms",
+                        labelStyle: TextStyle(
+                          color: mainColor2,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        floatingLabelStyle: TextStyle(
+                          color: secondaryColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        prefixIcon: Icon(Icons.note_add, color: secondaryColor),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: secondaryColor.withOpacity(0.3), width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: secondaryColor, width: 2),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.white, width: 1.5),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Changes Allowed Percentage Section
+                  Obx(() => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        styleText(
+                          text: "Maximum Changes Allowed to Book's Story:",
+                          fSize: 16,
+                          color: textColor2,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: '5%',
+                              groupValue: _controller.changesAllowedPercentage.value,
+                              onChanged: (String? newValue) {
+                                _controller.changesAllowedPercentage.value = newValue!;
+                              },
+                              activeColor: secondaryColor,
+                            ),
+                            styleText(text: "5%", fSize: 16, color: textColor2),
+                            const SizedBox(width: 15),
+                            Radio<String>(
+                              value: '10%',
+                              groupValue: _controller.changesAllowedPercentage.value,
+                              onChanged: (String? newValue) {
+                                _controller.changesAllowedPercentage.value = newValue!;
+                              },
+                              activeColor: secondaryColor,
+                            ),
+                            styleText(text: "10%", fSize: 16, color: textColor2),
+                            const SizedBox(width: 15),
+                            Radio<String>(
+                              value: '15%',
+                              groupValue: _controller.changesAllowedPercentage.value,
+                              onChanged: (String? newValue) {
+                                _controller.changesAllowedPercentage.value = newValue!;
+                              },
+                              activeColor: secondaryColor,
+                            ),
+                            styleText(text: "15%", fSize: 16, color: textColor2),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )),
+
+                  // Signature Section - Fixed to check for null properly
+                  Obx(() => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        styleText(
+                          text: "Your Signature:",
+                          fSize: 16,
+                          color: textColor2,
+                        ),
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: () => _controller.pickSignatureImage(),
+                          child: Container(
+                            height: 100,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: mainColor,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: secondaryColor.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: _controller.signatureImagePath.value == null
+                                ? Center(
+                              child: Icon(
+                                Icons.add_a_photo,
+                                color: secondaryColor,
+                                size: 40,
+                              ),
+                            )
+                                : Image.file(
+                              File(_controller.signatureImagePath.value!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
                 ],
               ),
             ),
@@ -78,7 +447,8 @@ class createContract extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
-            SizedBox(
+            // Replace the existing send button section with this:
+            Obx(() => SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
@@ -88,19 +458,21 @@ class createContract extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Contract Sent!')),
-                  );
+                onPressed: (_controller.isSubmitting.value || _controller.loadingUsers.value)
+                    ? null
+                    : () {
+                  _controller.sendContract(context: context);
                 },
-                child: styleText(
+                child: _controller.isSubmitting.value
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : styleText(
                   text: "Send Contract",
                   fSize: 22,
                   color: textColor2,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
+            )),
             const SizedBox(height: 15),
             SizedBox(
               width: double.infinity,
@@ -113,9 +485,7 @@ class createContract extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Message Director Clicked!')),
-                  );
+                  Get.snackbar("Message", "Message Director Clicked!");
                 },
                 child: styleText(
                   text: "Message Director",
@@ -138,12 +508,14 @@ class createContract extends StatelessWidget {
         bool isSearch = false,
         bool isDate = false,
         IconData? icon,
+        TextInputType keyboardType = TextInputType.text,
       }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: TextFormField(
         controller: controller,
         readOnly: isDate,
+        keyboardType: keyboardType,
         onTap: isDate
             ? () async {
           DateTime? picked = await showDatePicker(
@@ -172,7 +544,7 @@ class createContract extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
           prefixIcon: isSearch
-              ? Icon(Icons.search, color: secondaryColor)
+              ? Icon(icon ?? Icons.person_search, color: secondaryColor)
               : icon != null
               ? Icon(icon, color: secondaryColor)
               : null,

@@ -10,6 +10,7 @@ class loginGetx extends GetxController {
   var userEmail = ''.obs;
   var userId = 0.obs;
   var profileImage = ''.obs;
+  var userRole = 0.obs;
 
   @override
   void onInit() {
@@ -38,7 +39,8 @@ class loginGetx extends GetxController {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-          },body: jsonEncode({
+          },
+          body: jsonEncode({
             "email": email,
             "password": password,
           }));
@@ -46,20 +48,24 @@ class loginGetx extends GetxController {
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         if (json['success'] == true) {
-          userName.value = json['data']['name'];
-          userEmail.value = json['data']['email'];
-          userId.value = json['data']['id'];
-          profileImage.value = json['data']['profile_image'] ?? '';
-          Get.snackbar("Success", json['message']);
+          // Add null checks and type conversion
+          final data = json['data'] ?? {};
+          userName.value = data['name']?.toString() ?? '';
+          userEmail.value = data['email']?.toString() ?? '';
+          userId.value = int.tryParse(data['id']?.toString() ?? '') ?? 0;
+          userRole.value = int.tryParse(data['role_id']?.toString() ?? '') ?? 0;
+          profileImage.value = data['profile_image']?.toString() ?? '';
+
+          Get.snackbar("Success", json['message']?.toString() ?? 'Login successful');
           Get.offAllNamed("/homePage");
         } else {
-          Get.snackbar("Error", json['message']);
+          Get.snackbar("Error", json['message']?.toString() ?? 'Login failed');
         }
       } else {
-        Get.snackbar("false", " code of response: ${response.statusCode}");
+        Get.snackbar("Error", "Server responded with status code: ${response.statusCode}");
       }
     } catch (e) {
-      Get.snackbar("false", e.toString());
+      Get.snackbar("Error", "An error occurred: ${e.toString()}");
     } finally {
       isLoading.value = false;
     }
