@@ -1,3 +1,4 @@
+import 'package:f_book2/view/contract/contractsListPage.dart';
 import 'package:f_book2/view/userProfile/AboutUsPage.dart';
 import 'package:f_book2/view/Books/BookDetails/BookDetailsPage.dart';
 import 'package:f_book2/view/Books/addBook.dart';
@@ -66,12 +67,13 @@ class MyApp extends StatelessWidget {
         GetPage(name: "/usersPage", page: () => usersPage()),
         GetPage(name: "/AboutUsPage", page: () => AboutUsPage()),
         GetPage(name: "/HelpPage", page: () => HelpPage()),
-
+        GetPage(name: "/contractsListPage", page: () => contractsListPage()),
 
       ],
     );
   }
 }
+
 
 
 

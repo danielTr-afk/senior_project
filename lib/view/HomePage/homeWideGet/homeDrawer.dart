@@ -143,6 +143,7 @@ class homeDrawer extends StatelessWidget {
                 homeListTile(icon: Icons.menu_book, text: "Upload Book", onTap: '/addBook'),
                 homeListTile(icon: Icons.movie, text: "Upload Movie", onTap: '/addMovie'),
                 homeListTile(icon: Icons.contact_page, text: "Create contract", onTap: '/createContract'),
+                homeListTile(icon: Icons.contacts, text: "Contracts", onTap: '/contractsListPage'),
                 homeListTile(icon: Icons.logout, text: "Logout", onTap: '/login')
               ],
             );
