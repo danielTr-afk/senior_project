@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:f_book2/controller/variables.dart';
@@ -271,10 +270,10 @@ class createContract extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
 
-                  // Other fields...
+                  // Film Project field - this will now store the film name
                   contractInput(
                     context,
-                    "Film Project",
+                    "Film Project Name",
                     _controller.filmController,
                     icon: Icons.movie_creation_outlined,
                   ),
@@ -394,7 +393,7 @@ class createContract extends StatelessWidget {
                     ),
                   )),
 
-                  // Signature Section - Fixed to check for null properly
+                  // Signature Section - Updated to handle image properly
                   Obx(() => Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
                     child: Column(
@@ -420,19 +419,52 @@ class createContract extends StatelessWidget {
                               ),
                             ),
                             child: _controller.signatureImagePath.value == null
-                                ? Center(
-                              child: Icon(
-                                Icons.add_a_photo,
-                                color: secondaryColor,
-                                size: 40,
-                              ),
+                                ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_a_photo,
+                                  color: secondaryColor,
+                                  size: 40,
+                                ),
+                                const SizedBox(height: 8),
+                                styleText(
+                                  text: "Tap to add signature",
+                                  fSize: 14,
+                                  color: mainColor2!,
+                                ),
+                              ],
                             )
-                                : Image.file(
-                              File(_controller.signatureImagePath.value!),
-                              fit: BoxFit.cover,
+                                : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                File(_controller.signatureImagePath.value!),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 100,
+                              ),
                             ),
                           ),
                         ),
+                        if (_controller.signatureImagePath.value != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    _controller.signatureImagePath.value = null;
+                                  },
+                                  child: styleText(
+                                    text: "Remove",
+                                    fSize: 14,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
                     ),
                   )),
@@ -441,13 +473,13 @@ class createContract extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             styleText(
-              text: "By clicking 'Send Contract', you confirm sending the contract details to the director.",
+              text: "By clicking 'Send Contract', you confirm sending the contract details to the recipient.",
               fSize: 20,
               color: textColor2,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
-            // Replace the existing send button section with this:
+            // Send Contract Button
             Obx(() => SizedBox(
               width: double.infinity,
               height: 50,
@@ -485,10 +517,10 @@ class createContract extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  Get.snackbar("Message", "Message Director Clicked!");
+                  Get.snackbar("Message", "Message feature coming soon!");
                 },
                 child: styleText(
-                  text: "Message Director",
+                  text: "Message Recipient",
                   fSize: 22,
                   color: textColor2,
                   fontWeight: FontWeight.bold,
@@ -525,7 +557,7 @@ class createContract extends StatelessWidget {
             lastDate: DateTime(2100),
           );
           if (picked != null) {
-            controller.text = "${picked.year}-${picked.month}-${picked.day}";
+            controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
           }
         }
             : null,

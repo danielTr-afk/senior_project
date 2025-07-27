@@ -3,7 +3,6 @@ import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:f_book2/view/contract/contractWideget/contractListForm.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../controller/contract/getContractController.dart';
 
 class contractsListPage extends StatelessWidget {
@@ -16,13 +15,16 @@ class contractsListPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: mainColor,
       appBar: AppBar(
-        title: styleText(text: "My Contracts", fSize: 25, color: textColor2, fontWeight: FontWeight.bold,),
+        title: styleText(
+          text: "My Contracts",
+          fSize: 25,
+          color: textColor2,
+          fontWeight: FontWeight.bold,
+        ),
         backgroundColor: secondaryColor,
         leading: IconButton(
-            onPressed: (){
-              Get.back();
-            },
-            icon: Icon(Icons.arrow_back_ios, color: textColor2,)
+          onPressed: () => Get.back(),
+          icon: Icon(Icons.arrow_back_ios, color: textColor2),
         ),
       ),
       body: Obx(() {
@@ -31,11 +33,23 @@ class contractsListPage extends StatelessWidget {
         }
 
         if (controller.errorMessage.value.isNotEmpty) {
-          return Center(child: Text(controller.errorMessage.value));
+          return Center(
+            child: styleText(
+              text: controller.errorMessage.value,
+              fSize: 18,
+              color: Colors.red,
+            ),
+          );
         }
 
         if (controller.contracts.isEmpty) {
-          return const Center(child: Text('No contracts found'));
+          return Center(
+            child: styleText(
+              text: 'No contracts found',
+              fSize: 18,
+              color: textColor2,
+            ),
+          );
         }
 
         return ListView.builder(
@@ -51,7 +65,22 @@ class contractsListPage extends StatelessWidget {
               price: contract['agreed_price'],
               royalty: contract['royalty_percentage'],
               onTap: () {
-                Get.toNamed('/contractDetails', arguments: contract);
+                if (contract['id'] != null) {
+                  Get.toNamed(
+                    '/AcceptContractPage',
+                    arguments: {
+                      'contractId': contract['id'].toString(),
+                      'contractData': contract,
+                    },
+                  );
+                } else {
+                  Get.snackbar(
+                    'Error',
+                    'Invalid contract data',
+                    backgroundColor: Colors.red,
+                    colorText: Colors.white,
+                  );
+                }
               },
             );
           },

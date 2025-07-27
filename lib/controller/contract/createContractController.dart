@@ -1,7 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 
 import '../authController/loginGetX.dart';
@@ -78,6 +79,19 @@ class CreateContractController extends GetxController {
     }
   }
 
+  // Convert image to base64 string
+  Future<String?> imageToBase64(String imagePath) async {
+    try {
+      File imageFile = File(imagePath);
+      List<int> imageBytes = await imageFile.readAsBytes();
+      String base64String = base64Encode(imageBytes);
+      return base64String;
+    } catch (e) {
+      print('Error converting image to base64: $e');
+      return null;
+    }
+  }
+
   final loginGetx _authController = Get.find<loginGetx>(); // Get the auth controller
 
   Future<void> sendContract({
@@ -105,6 +119,13 @@ class CreateContractController extends GetxController {
       return;
     }
 
+    if (filmController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a film project name')),
+      );
+      return;
+    }
+
     // Validate numeric inputs
     final agreedPrice = double.tryParse(priceController.text);
     final royaltyPercentage = double.tryParse(royaltyController.text);
@@ -128,10 +149,26 @@ class CreateContractController extends GetxController {
     print('Auth User Role: ${_authController.userRole.value}');
     print('Selected Book ID: ${bookId.value}');
     print('Selected Receiver ID: ${receiverId.value}');
+    print('Film Name: ${filmController.text}');
 
     isSubmitting.value = true; // Start loading
 
     try {
+      // Convert signature image to base64 if available
+      String? signatureBase64;
+      if (signatureImagePath.value != null) {
+        signatureBase64 = await imageToBase64(signatureImagePath.value!);
+        if (signatureBase64 == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to process signature image'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+
       final requestBody = {
         'user_id': _authController.userId.value,
         'user_role': _authController.userRole.value,
@@ -143,6 +180,8 @@ class CreateContractController extends GetxController {
         'max_changes_allowed': changesAllowedPercentage.value,
         'contract_date': dateController.text,
         'expiry_date': expiryDateController.text.isEmpty ? null : expiryDateController.text,
+        'film_name': filmController.text,
+        'signature_image': signatureBase64 ?? '',
       };
 
       print('Sending contract with data: ${json.encode(requestBody)}'); // Debug print
