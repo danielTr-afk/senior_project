@@ -1,4 +1,5 @@
 import 'package:f_book2/view/GlobalWideget/bfCrad2.dart';
+import 'package:f_book2/view/Movies/MovieDetails/MovieDetailsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/movies/moviesController.dart';
@@ -66,7 +67,20 @@ class moviesCategories extends StatelessWidget {
                       itemCount: movies.length,
                       itemBuilder: (context, i) {
                         final movie = movies[i];
-                        return bfCard2(image: movie['image']);
+                        return GestureDetector(
+                          onTap: () {
+                            // Navigate to MovieDetailsPage with film ID
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MovieDetailsPage(
+                                  filmId: movie['id'].toString(),
+                                ),
+                              ),
+                            );
+                          },
+                          child: bfCard2(image: movie['image']),
+                        );
                       },
                     ),
                   ),

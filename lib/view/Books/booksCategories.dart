@@ -1,3 +1,4 @@
+import 'package:f_book2/view/Books/BookDetails/BookDetailsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/books/booksController.dart';
@@ -58,7 +59,7 @@ class booksCategories extends StatelessWidget {
                   titleSection(
                     text: categoryName,
                     color: textColor2,
-                    onTap: "/booksListPage", // You can later pass category name
+                    onTap: "/booksListPage",
                   ),
                   const SizedBox(height: 10),
                   SizedBox(
@@ -68,8 +69,20 @@ class booksCategories extends StatelessWidget {
                       itemCount: booksInCategory.length,
                       itemBuilder: (context, index) {
                         final book = booksInCategory[index];
-                        return bfCard2(
-                          image: book['image'] ?? 'images/booksImage/default.jpg',
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BookDetailsPage(
+                                  bookId: book['id'].toString(),
+                                ),
+                              ),
+                            );
+                          },
+                          child: bfCard2(
+                            image: book['image'] ?? 'images/booksImage/default.jpg',
+                          ),
                         );
                       },
                     ),
