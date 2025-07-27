@@ -15,7 +15,7 @@ class BookDetailsPage extends StatelessWidget {
         backgroundColor: blackColor2,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: textColor2),
+          icon: Icon(Icons.arrow_back_ios, color: textColor2),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: styleText(text: 'Book Details', fSize: 30, color: textColor2, fontWeight: FontWeight.bold, ),

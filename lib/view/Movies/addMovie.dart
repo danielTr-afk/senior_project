@@ -50,6 +50,10 @@ class addMovie extends StatelessWidget {
             _buildDropdown(),
 
             const SizedBox(height: 20),
+            _buildLabel('Choose Book (Optional)'),
+            _buildBookDropdown(),
+
+            const SizedBox(height: 20),
             _buildLabel('Description'),
             _buildTextField(
               'Write a short description',
@@ -186,6 +190,101 @@ class addMovie extends StatelessWidget {
             if (value != null) {
               movieController.setCategory(value);
             }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBookDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        color: blackColor2,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: movieController.isLoadingBooks.value
+            ? Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: secondaryColor,
+                ),
+              ),
+              const SizedBox(width: 12),
+              styleText(
+                text: "Loading books...",
+                fSize: 16,
+                color: mainColor2!,
+              ),
+            ],
+          ),
+        )
+            : DropdownButton<int>(
+          isExpanded: true,
+          value: movieController.selectedBookId.value == 0
+              ? null
+              : movieController.selectedBookId.value,
+          dropdownColor: blackColor2,
+          icon: Icon(Icons.arrow_drop_down, color: secondaryColor),
+          iconSize: 28,
+          hint: Padding(
+            padding: const EdgeInsets.only(left: 16),
+            child: styleText(
+              text: movieController.getSelectedBookTitle(),
+              fSize: 16,
+              color: mainColor2!,
+            ),
+          ),
+          items: [
+            // Add "None" option
+            DropdownMenuItem<int>(
+              value: 0,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: styleText(
+                  text: "None (Original Movie)",
+                  fSize: 16,
+                  color: textColor2,
+                ),
+              ),
+            ),
+            // Add book options
+            ...movieController.books.map((book) {
+              // Ensure ID is an integer
+              int bookId = book['id'] is int ? book['id'] : int.tryParse(book['id'].toString()) ?? 0;
+
+              return DropdownMenuItem<int>(
+                value: bookId,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      styleText(
+                        text: book['title']?.toString() ?? 'Unknown Title',
+                        fSize: 16,
+                        color: textColor2,
+                      ),
+                      styleText(
+                        text: 'by ${book['author_name']?.toString() ?? 'Unknown Author'}',
+                        fSize: 12,
+                        color: mainColor2!,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ],
+          onChanged: (int? value) {
+            movieController.setSelectedBook(value ?? 0);
           },
         ),
       ),
