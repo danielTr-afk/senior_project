@@ -14,16 +14,13 @@ class homeBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
         currentIndex: index,
-        selectedFontSize: 20,
         unselectedFontSize: 15,
         selectedItemColor: secondaryColor,
         unselectedItemColor: textColor2,
         showUnselectedLabels: true,
         selectedIconTheme: IconThemeData(
-          size: 40,
           color: secondaryColor,
         ),
-        unselectedIconTheme: IconThemeData(size: 30, color: textColor2),
         items: [
           BottomNavigationBarItem(
               icon: Icon(

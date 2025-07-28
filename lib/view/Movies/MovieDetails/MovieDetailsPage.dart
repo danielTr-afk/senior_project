@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:get/get.dart';
+import '../../../controller/authController/loginGetX.dart';
 
 class MovieDetailsPage extends StatefulWidget {
   final String filmId;
@@ -16,91 +18,162 @@ class MovieDetailsPage extends StatefulWidget {
   _MovieDetailsPageState createState() => _MovieDetailsPageState();
 }
 
-class _MovieDetailsPageState extends State<MovieDetailsPage> {
+class _MovieDetailsPageState extends State<MovieDetailsPage> with AutomaticKeepAliveClientMixin {
   Map<String, dynamic>? movieData;
   bool isLoading = true;
-  bool showComments = false;
-  bool isLiked = false; // Track like status
-  bool isLikeLoading = false; // Track like operation loading
+  bool isLiked = false;
+  bool isLikeLoading = false;
   List<Map<String, dynamic>> comments = [];
   TextEditingController commentController = TextEditingController();
-  String currentUserId = '32'; // You should get this from your auth system
+  bool _disposed = false;
+
+  // Get user ID from login controller safely
+  String get currentUserId {
+    try {
+      final loginController = Get.find<loginGetx>();
+      return loginController.userId.value.toString();
+    } catch (e) {
+      print('Error getting user ID: $e');
+      return '32'; // fallback ID
+    }
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    fetchMovieDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
+  }
+
+  Future<void> _initializeData() async {
+    if (!mounted || _disposed) return;
+
+    try {
+      await fetchMovieDetails();
+      if (mounted && !_disposed) {
+        await checkFilmLikeStatus();
+      }
+    } catch (e) {
+      print('Error initializing data: $e');
+      if (mounted && !_disposed) {
+        _showError('Failed to load movie details');
+      }
+    }
   }
 
   @override
   void dispose() {
+    _disposed = true;
     commentController.dispose();
     super.dispose();
   }
 
+  void _safeSetState(VoidCallback fn) {
+    if (mounted && !_disposed) {
+      setState(fn);
+    }
+  }
+
+  void _showError(String message) {
+    if (mounted && !_disposed) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
   Future<void> fetchMovieDetails() async {
+    if (_disposed) return;
+
     try {
       final response = await http.get(
         Uri.parse('http://10.0.2.2/BookFlix/film.php?id=${widget.filmId}'),
-      );
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 30));
+
+      if (_disposed) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['status'] == 'success') {
-          setState(() {
-            movieData = data['data']['films'][0];
+        if (data['status'] == 'success' &&
+            data['data'] != null &&
+            data['data']['films'] != null &&
+            data['data']['films'].isNotEmpty) {
+
+          _safeSetState(() {
+            movieData = Map<String, dynamic>.from(data['data']['films'][0]);
             isLoading = false;
           });
-
-          // After getting movie details, check like status
-          await checkFilmLikeStatus();
+        } else {
+          _safeSetState(() {
+            isLoading = false;
+          });
+          _showError('Movie not found');
         }
+      } else {
+        _safeSetState(() {
+          isLoading = false;
+        });
+        _showError('Failed to load movie: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching movie details: $e');
-      setState(() {
-        isLoading = false;
-      });
+      if (!_disposed) {
+        _safeSetState(() {
+          isLoading = false;
+        });
+        _showError('Network error: ${e.toString()}');
+      }
     }
   }
 
   Future<void> checkFilmLikeStatus() async {
-    try {
-      print('Checking like status for film ID: ${widget.filmId}, User ID: $currentUserId');
+    if (_disposed || movieData == null) return;
 
+    try {
       final response = await http.get(
         Uri.parse('http://10.0.2.2/BookFlix/check_film_like_status.php?film_id=${widget.filmId}&user_id=$currentUserId'),
-      );
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ).timeout(const Duration(seconds: 15));
 
-      print('Like status response code: ${response.statusCode}');
-      print('Like status response body: ${response.body}');
+      if (_disposed) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
-          setState(() {
+          _safeSetState(() {
             isLiked = data['is_liked'] ?? false;
           });
-          print('Like status updated: $isLiked');
-        } else {
-          print('Error checking like status: ${data['message']}');
         }
       }
     } catch (e) {
       print('Error checking film like status: $e');
+      // Don't show error for like status check, it's not critical
     }
   }
 
   Future<void> toggleLike() async {
-    if (isLikeLoading) return; // Prevent multiple simultaneous requests
+    if (isLikeLoading || _disposed || movieData == null) return;
 
-    setState(() {
+    _safeSetState(() {
       isLikeLoading = true;
     });
 
     try {
-      print('Attempting to toggle like for film ID: ${widget.filmId}');
-
       final response = await http.post(
         Uri.parse('http://10.0.2.2/BookFlix/toggle_like_film.php'),
         headers: {
@@ -110,88 +183,75 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
           'film_id': widget.filmId,
           'user_id': currentUserId,
         },
-      );
+      ).timeout(const Duration(seconds: 15));
 
-      print('Toggle like response status code: ${response.statusCode}');
-      print('Toggle like response body: ${response.body}');
+      if (_disposed) return;
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Parsed response data: $data');
 
         if (data['status'] == 'success') {
-          setState(() {
+          _safeSetState(() {
             if (movieData != null) {
               movieData!['likes'] = data['likes'];
             }
             isLiked = data['is_liked'] ?? false;
           });
 
-          // Show feedback to user
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(data['message'] ?? (isLiked ? 'Movie liked!' : 'Movie unliked!')),
-              duration: Duration(seconds: 2),
-              backgroundColor: isLiked ? Colors.red : Colors.grey,
-            ),
-          );
+          if (mounted && !_disposed) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(data['message'] ?? (isLiked ? 'Movie liked!' : 'Movie unliked!')),
+                duration: const Duration(seconds: 2),
+                backgroundColor: isLiked ? Colors.red : Colors.grey,
+              ),
+            );
+          }
         } else {
-          // Handle error response
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${data['message'] ?? 'Unknown error'}'),
-              backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
-            ),
-          );
+          _showError('Error: ${data['message'] ?? 'Unknown error'}');
         }
       } else {
-        print('HTTP Error: ${response.statusCode}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Server error: ${response.statusCode}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showError('Server error: ${response.statusCode}');
       }
     } catch (e) {
       print('Error toggling like: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Network error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      _showError('Network error occurred');
     } finally {
-      setState(() {
-        isLikeLoading = false;
-      });
+      if (!_disposed) {
+        _safeSetState(() {
+          isLikeLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _downloadAndOpenFile(String url, String fileName, String fileType) async {
+    if (_disposed) return;
+
     try {
       // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-            backgroundColor: blackColor2,
-            child: Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(color: secondaryColor),
-                  SizedBox(height: 20),
-                  styleText(
-                    text: 'Loading $fileType...',
-                    fSize: 16,
-                    color: textColor2,
-                  ),
-                ],
+        builder: (BuildContext dialogContext) {
+          return PopScope(
+            canPop: false,
+            child: Dialog(
+              backgroundColor: blackColor2,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: secondaryColor),
+                    const SizedBox(height: 20),
+                    styleText(
+                      text: 'Loading $fileType...',
+                      fSize: 16,
+                      color: textColor2,
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -199,262 +259,144 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
       );
 
       // Download the file
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(url),
+      ).timeout(const Duration(minutes: 5));
+
+      if (_disposed) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        return;
+      }
 
       if (response.statusCode == 200) {
         // Get the app's document directory
         final directory = await getApplicationDocumentsDirectory();
-
-        // Create file path
         final filePath = '${directory.path}/$fileName';
-
-        // Write file to device
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
 
         // Close loading dialog
-        Navigator.pop(context);
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+
+        if (_disposed) return;
 
         // Open file with default app
         final result = await OpenFile.open(filePath);
 
-        // Handle the result
-        if (result.type != ResultType.done) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Unable to open $fileType: ${result.message}'),
-              backgroundColor: Colors.red,
-            ),
-          );
+        if (result.type != ResultType.done && !_disposed) {
+          _showError('Unable to open $fileType: ${result.message}');
         }
       } else {
-        Navigator.pop(context); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to download $fileType'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        _showError('Failed to download $fileType');
       }
     } catch (e) {
-      // Close loading dialog if still open
       if (Navigator.canPop(context)) {
         Navigator.pop(context);
       }
-
       print('Error downloading/opening file: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error opening $fileType: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showError('Error opening $fileType');
     }
   }
 
   Future<void> playTrailer() async {
-    if (movieData?['trailer'] != null && movieData!['trailer'].isNotEmpty) {
-      final trailerUrl = movieData!['trailer'];
-      print('Opening trailer from: $trailerUrl'); // Debug log
+    if (_disposed || movieData == null) return;
 
-      // Extract file extension from URL or use a default
-      String fileName = 'trailer_${widget.filmId}.mp4';
-      if (trailerUrl.contains('.')) {
-        final extension = trailerUrl.split('.').last.split('?').first;
-        fileName = 'trailer_${widget.filmId}.$extension';
-      }
-
-      await _downloadAndOpenFile(trailerUrl, fileName, 'trailer');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Trailer not available')),
-      );
+    final trailerUrl = movieData!['trailer']?.toString();
+    if (trailerUrl == null || trailerUrl.isEmpty) {
+      _showError('Trailer not available');
+      return;
     }
+
+    String fileName = 'trailer_${widget.filmId}.mp4';
+    if (trailerUrl.contains('.')) {
+      final extension = trailerUrl.split('.').last.split('?').first;
+      fileName = 'trailer_${widget.filmId}.$extension';
+    }
+
+    await _downloadAndOpenFile(trailerUrl, fileName, 'trailer');
   }
 
   Future<void> playMovie() async {
-    if (movieData?['movie_file'] != null && movieData!['movie_file'].isNotEmpty) {
-      final movieUrl = movieData!['movie_file'];
-      print('Opening movie from: $movieUrl'); // Debug log
+    if (_disposed || movieData == null) return;
 
-      // Extract file extension from URL or use a default
-      String fileName = 'movie_${widget.filmId}.mp4';
-      if (movieUrl.contains('.')) {
-        final extension = movieUrl.split('.').last.split('?').first;
-        fileName = 'movie_${widget.filmId}.$extension';
-      }
-
-      await _downloadAndOpenFile(movieUrl, fileName, 'movie');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Movie file not available')),
-      );
+    final movieUrl = movieData!['movie_file']?.toString();
+    if (movieUrl == null || movieUrl.isEmpty) {
+      _showError('Movie file not available');
+      return;
     }
-  }
 
-  Future<void> addComment(String comment) async {
-    try {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2/BookFlix/add_comment.php'),
-        body: {
-          'film_id': widget.filmId,
-          'user_id': currentUserId,
-          'comment': comment,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'success') {
-          commentController.clear();
-          fetchComments();
-        }
-      }
-    } catch (e) {
-      print('Error adding comment: $e');
+    String fileName = 'movie_${widget.filmId}.mp4';
+    if (movieUrl.contains('.')) {
+      final extension = movieUrl.split('.').last.split('?').first;
+      fileName = 'movie_${widget.filmId}.$extension';
     }
-  }
 
-  Future<void> fetchComments() async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://10.0.2.2/BookFlix/get_comments.php?film_id=${widget.filmId}'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'success') {
-          setState(() {
-            comments = List<Map<String, dynamic>>.from(data['comments']);
-          });
-        }
-      }
-    } catch (e) {
-      print('Error fetching comments: $e');
-    }
-  }
-
-  void _showCommentsDialog() {
-    fetchComments();
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: blackColor2,
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  styleText(
-                    text: "Comments",
-                    fSize: 20,
-                    color: textColor2,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: textColor2),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: comments.length,
-                  itemBuilder: (context, index) {
-                    final comment = comments[index];
-                    return Container(
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: mainColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          styleText(
-                            text: comment['user_name'] ?? 'Anonymous',
-                            fSize: 14,
-                            color: secondaryColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          SizedBox(height: 4),
-                          styleText(
-                            text: comment['comment'],
-                            fSize: 16,
-                            color: textColor2,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: commentController,
-                        style: TextStyle(color: textColor2),
-                        decoration: InputDecoration(
-                          hintText: "Add a comment...",
-                          hintStyle: TextStyle(color: textColor2!.withOpacity(0.7)),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(color: mainColor2!),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(color: mainColor2!),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(color: secondaryColor),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        if (commentController.text.isNotEmpty) {
-                          addComment(commentController.text);
-                        }
-                      },
-                      icon: Icon(Icons.send, color: secondaryColor),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    await _downloadAndOpenFile(movieUrl, fileName, 'movie');
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     if (isLoading) {
       return Scaffold(
         backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator()),
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
 
     if (movieData == null) {
       return Scaffold(
         backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
         body: Center(
-          child: styleText(
-            text: "Movie not found",
-            fSize: 20,
-            color: textColor2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              styleText(
+                text: "Movie not found",
+                fSize: 20,
+                color: textColor2,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  _safeSetState(() {
+                    isLoading = true;
+                  });
+                  _initializeData();
+                },
+                child: const Text('Retry'),
+              ),
+            ],
           ),
         ),
       );
@@ -481,18 +423,33 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                           Colors.black.withOpacity(0.7),
                           Colors.transparent,
                         ],
-                        stops: [0.6, 0.85, 1.0],
+                        stops: const [0.6, 0.85, 1.0],
                       ).createShader(
                           Rect.fromLTRB(0, 0, rect.width, rect.height));
                     },
                     blendMode: BlendMode.dstIn,
                     child: Image.network(
-                      movieData!['image'] ?? '',
+                      movieData!['image']?.toString() ?? '',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           color: Colors.grey,
-                          child: Icon(Icons.error, color: Colors.white),
+                          child: const Icon(Icons.error, color: Colors.white),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: Colors.grey[800],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                                  : null,
+                              color: secondaryColor,
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -518,7 +475,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
           // Content after image
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 20, 20, 30),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -528,40 +485,40 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                     color: secondaryColor,
                     fontWeight: FontWeight.bold,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
                       Expanded(
                         child: styleText(
-                          text: movieData!['title'] ?? 'Unknown Title',
+                          text: movieData!['title']?.toString() ?? 'Unknown Title',
                           fSize: 30,
                           color: textColor2,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Icon(Icons.bookmark_border, color: textColor2),
+                      const Icon(Icons.bookmark_border, color: Colors.white),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   styleText(
-                    text: movieData!['category'] ?? 'Unknown Category',
+                    text: movieData!['category']?.toString() ?? 'Unknown Category',
                     fSize: 17,
                     color: mainColor2!,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   styleText(
-                    text: movieData!['description'] ?? 'No description available',
+                    text: movieData!['description']?.toString() ?? 'No description available',
                     fSize: 20,
                     color: textColor2,
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Row(
                     children: [
                       // Like button with dynamic icon and loading state
                       GestureDetector(
                         onTap: isLikeLoading ? null : toggleLike,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: isLiked ? Colors.red.withOpacity(0.2) : blackColor2,
                             borderRadius: BorderRadius.circular(6),
@@ -571,12 +528,12 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (isLikeLoading)
-                                SizedBox(
+                                const SizedBox(
                                   width: 14,
                                   height: 14,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    color: secondaryColor,
+                                    color: Colors.white,
                                   ),
                                 )
                               else
@@ -585,7 +542,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                                   color: isLiked ? Colors.red : textColor2,
                                   size: 16,
                                 ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               styleText(
                                 text: "${movieData!['likes'] ?? 0}",
                                 fSize: 14,
@@ -595,28 +552,22 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 8),
-                      // Comments button
-                      GestureDetector(
-                        onTap: _showCommentsDialog,
-                        child: _buildInfoBadge(context, "💬 Comments"),
-                      ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       _buildInfoBadge(context, "⭐ ${movieData!['rating'] ?? 0.0}"),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       // Watch Trailer button
                       GestureDetector(
                         onTap: playTrailer,
-                        child: _buildInfoBadge(context, "🎬 Watch Trailer"),
+                        child: _buildInfoBadge(context, "🎬 Trailer"),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton.icon(
                     onPressed: playMovie,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: secondaryColor,
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: const Size(double.infinity, 50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -639,7 +590,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
 
   Widget _buildInfoBadge(BuildContext context, String text) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: blackColor2,
         borderRadius: BorderRadius.circular(6),
