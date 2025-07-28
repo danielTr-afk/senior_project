@@ -6,6 +6,9 @@ import 'dart:convert';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:get/get.dart';
+
+import '../../../controller/authController/loginGetX.dart';
 
 class BookDetailsPage extends StatefulWidget {
   final String bookId;
@@ -22,7 +25,11 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   bool isLoading = true;
   bool isLiked = false;
   bool isLoadingLike = false;
+  bool isAddingComment = false;
   TextEditingController commentController = TextEditingController();
+
+  // Get the login controller to access user data
+  final loginGetx loginController = Get.find<loginGetx>();
 
   @override
   void initState() {
@@ -45,7 +52,17 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             bookData = data['data'];
             isLoading = false;
           });
+        } else {
+          print('Error fetching book details: ${data['message']}');
+          setState(() {
+            isLoading = false;
+          });
         }
+      } else {
+        print('HTTP Error: ${response.statusCode}');
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       setState(() {
@@ -67,7 +84,11 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
           setState(() {
             comments = List<Map<String, dynamic>>.from(data['data']);
           });
+        } else {
+          print('Error fetching comments: ${data['message']}');
         }
+      } else {
+        print('HTTP Error fetching comments: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching comments: $e');
@@ -77,16 +98,20 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   Future<void> checkLikeStatus() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2/BookFlix/check_like_status.php?book_id=${widget.bookId}&user_id=1'),
+        Uri.parse('http://10.0.2.2/BookFlix/check_like_status.php?book_id=${widget.bookId}&user_id=${loginController.userId.value}'),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
           setState(() {
-            isLiked = data['is_liked'];
+            isLiked = data['is_liked'] ?? false;
           });
+        } else {
+          print('Error checking like status: ${data['message']}');
         }
+      } else {
+        print('HTTP Error checking like status: ${response.statusCode}');
       }
     } catch (e) {
       print('Error checking like status: $e');
@@ -106,7 +131,8 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'book_id': widget.bookId,
-          'user_id': '1', // Replace with actual user ID
+          'user_id': loginController.userId.value.toString(),
+          'action': isLiked ? 'unlike' : 'like', // Add the action parameter
         }),
       );
 
@@ -114,17 +140,33 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
           setState(() {
-            isLiked = data['is_liked'];
+            isLiked = data['is_liked'] ?? false;
             if (bookData != null) {
               bookData!['likes'] = data['new_likes_count'];
             }
           });
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? 'Like status updated'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${data['message']}')),
+          );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('HTTP Error: ${response.statusCode}')),
+        );
       }
     } catch (e) {
       print('Error toggling like: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update like status')),
+        SnackBar(content: Text('Failed to update like status: $e')),
       );
     } finally {
       setState(() {
@@ -134,7 +176,16 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
   }
 
   Future<void> addComment() async {
-    if (commentController.text.trim().isEmpty) return;
+    if (commentController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a comment')),
+      );
+      return;
+    }
+
+    setState(() {
+      isAddingComment = true;
+    });
 
     try {
       final response = await http.post(
@@ -142,8 +193,8 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'book_id': widget.bookId,
-          'user_id': '1', // Replace with actual user ID
-          'comment': commentController.text.trim(),
+          'user_id': loginController.userId.value.toString(),
+          'comment': commentController.text.trim(), // This matches what PHP expects
         }),
       );
 
@@ -153,8 +204,12 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
           setState(() {
             commentController.clear();
           });
-          fetchComments(); // Refresh comments
-          Navigator.of(context).pop(); // Close comment dialog
+
+          // Close dialog first
+          Navigator.of(context).pop();
+
+          // Refresh comments
+          await fetchComments();
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Comment added successfully!')),
@@ -164,12 +219,20 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
             SnackBar(content: Text('Failed to add comment: ${data['message']}')),
           );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('HTTP Error: ${response.statusCode}')),
+        );
       }
     } catch (e) {
       print('Error adding comment: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error adding comment: $e')),
       );
+    } finally {
+      setState(() {
+        isAddingComment = false;
+      });
     }
   }
 
@@ -248,7 +311,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: isAddingComment ? null : () => Navigator.of(context).pop(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey,
                       shape: RoundedRectangleBorder(
@@ -258,14 +321,23 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                     child: styleText(text: "Cancel", fSize: 16, color: textColor2),
                   ),
                   ElevatedButton(
-                    onPressed: addComment,
+                    onPressed: isAddingComment ? null : addComment,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: secondaryColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: styleText(text: "Post", fSize: 16, color: textColor2),
+                    child: isAddingComment
+                        ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: textColor2,
+                      ),
+                    )
+                        : styleText(text: "Post", fSize: 16, color: textColor2),
                   ),
                 ],
               ),
@@ -345,10 +417,10 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
               ),
             )
                 : Icon(
-              isLiked ? Icons.favorite : Icons.favorite_border,
-              color: isLiked ? Colors.red : textColor2,
+              Icons.favorite,
+              color: textColor2,
             ),
-            onPressed: isLoadingLike ? null : toggleLike,
+            onPressed: (){},
           ),
         ],
       ),
@@ -447,7 +519,7 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                 Expanded(
                   child: _button(
                     isLiked ? Icons.favorite : Icons.favorite_border,
-                    "Like",
+                    isLiked ? "Unlike" : "Like",
                     color: isLiked ? Colors.red : textColor2!,
                     onPressed: isLoadingLike ? null : toggleLike,
                   ),

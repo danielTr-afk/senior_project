@@ -5,6 +5,8 @@ import '../../controller/books/booksController.dart';
 import '../../controller/movies/moviesController.dart'; // Add this import
 import '../../controller/variables.dart';
 import '../GlobalWideget/styleText.dart';
+import '../Books/BookDetails/BookDetailsPage.dart'; // Add this import
+import '../Movies/MovieDetails/MovieDetailsPage.dart'; // Add this import
 import 'homeWideGet/bfCard.dart';
 import 'homeWideGet/homeBottomNav.dart';
 import 'homeWideGet/homeDrawer.dart';
@@ -114,19 +116,99 @@ class homePage extends StatelessWidget {
                               itemCount: 2,
                               itemBuilder: (BuildContext context, int index) {
                                 var movie = movieController.movies[index];
-                                return bfCard(
-                                  image: movie['image'] ?? "images/onBoardingImage/onboardingphoto2.png",
-                                  text: movie['title'] ?? "Unknown Title",
+                                return GestureDetector(
                                   onTap: () {
-                                    // Add navigation to movie detail page if needed
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => MovieDetailsPage(
+                                          filmId: movie['id'].toString(),
+                                        ),
+                                      ),
+                                    );
                                   },
-                                  borderColor: mainColor,
-                                  titleColor: mainColor,
-                                  coverColor: textColor2,
-                                  isBook: false,
-                                  description: movie[''] ?? 'Unknown Category',
-                                  descriptionColor: mainColor,
-                                  routePage: '',
+                                  child: Container(
+                                    width: 180,
+                                    margin: const EdgeInsets.only(right: 15),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(width: 5, color: mainColor!),
+                                      color: textColor2,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 5),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                                          child: SizedBox(
+                                            height: 200,
+                                            width: double.infinity,
+                                            child: Image.network(
+                                              movie['image'] ?? "images/onBoardingImage/onboardingphoto2.png",
+                                              fit: BoxFit.cover,
+                                              loadingBuilder: (context, child, loadingProgress) {
+                                                if (loadingProgress == null) return child;
+                                                return Center(
+                                                  child: CircularProgressIndicator(
+                                                    value: loadingProgress.expectedTotalBytes != null
+                                                        ? loadingProgress.cumulativeBytesLoaded /
+                                                        loadingProgress.expectedTotalBytes!
+                                                        : null,
+                                                  ),
+                                                );
+                                              },
+                                              errorBuilder: (context, error, stackTrace) => Container(
+                                                color: Colors.grey[300],
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.movie,
+                                                    size: 50,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: SizedBox(
+                                            height: 85,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Flexible(
+                                                  child: styleText(
+                                                    text: movie['title'] ?? "Unknown Title",
+                                                    fSize: 16,
+                                                    color: mainColor,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Flexible(
+                                                  child: styleText(
+                                                    text: "Dir: ${movie['director']?.isNotEmpty == true ? movie['director'] : 'Unknown'}",
+                                                    fSize: 14,
+                                                    color: mainColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 );
                               },
                             );
@@ -151,17 +233,99 @@ class homePage extends StatelessWidget {
                               itemCount: 2,
                               itemBuilder: (BuildContext context, int index) {
                                 var book = controller.books[index];
-                                return bfCard(
-                                  image: book['image'],
-                                  text: book['title'],
-                                  onTap: () {},
-                                  borderColor: textColor2,
-                                  titleColor: textColor2,
-                                  coverColor: mainColor,
-                                  isBook: true,
-                                  description: book['author_name'],
-                                  descriptionColor: textColor2,
-                                  routePage: '',
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BookDetailsPage(
+                                          bookId: book['id'].toString(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 180,
+                                    margin: const EdgeInsets.only(right: 15),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(width: 5, color: textColor2!),
+                                      color: mainColor,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 5),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                                          child: SizedBox(
+                                            height: 200,
+                                            width: double.infinity,
+                                            child: Image.network(
+                                              book['image'],
+                                              fit: BoxFit.cover,
+                                              loadingBuilder: (context, child, loadingProgress) {
+                                                if (loadingProgress == null) return child;
+                                                return Center(
+                                                  child: CircularProgressIndicator(
+                                                    value: loadingProgress.expectedTotalBytes != null
+                                                        ? loadingProgress.cumulativeBytesLoaded /
+                                                        loadingProgress.expectedTotalBytes!
+                                                        : null,
+                                                  ),
+                                                );
+                                              },
+                                              errorBuilder: (context, error, stackTrace) => Container(
+                                                color: Colors.grey[300],
+                                                child: Center(
+                                                  child: Icon(
+                                                    Icons.book,
+                                                    size: 50,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: SizedBox(
+                                            height: 85,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Flexible(
+                                                  child: styleText(
+                                                    text: book['title'],
+                                                    fSize: 16,
+                                                    color: textColor2,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Flexible(
+                                                  child: styleText(
+                                                    text: "By ${book['author_name']?.isNotEmpty == true ? book['author_name'] : 'Unknown'}",
+                                                    fSize: 14,
+                                                    color: textColor2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 );
                               },
                             );

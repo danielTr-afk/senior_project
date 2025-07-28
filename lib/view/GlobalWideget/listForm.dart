@@ -11,6 +11,7 @@ class listForm extends StatelessWidget {
     required this.nav,
     required this.image,
     required this.numLike,
+    this.onTap, // Add optional onTap parameter
   });
 
   final String title;
@@ -18,6 +19,7 @@ class listForm extends StatelessWidget {
   final String nav;
   final String image;
   final String numLike;
+  final VoidCallback? onTap; // Add onTap callback
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class listForm extends StatelessWidget {
         color: blackColor2,
         elevation: 2,
         child: InkWell(
-          onTap: () => Get.offAll(nav),
+          onTap: onTap ?? () => Get.offAll(nav), // Use custom onTap if provided, otherwise use default navigation
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.all(12),

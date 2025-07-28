@@ -5,10 +5,10 @@ import '../../controller/lists/booksList.dart';
 import '../../controller/variables.dart';
 import '../GlobalWideget/listForm.dart';
 import '../GlobalWideget/styleText.dart';
-import '../HomePage/homeWideGet/homeDrawer.dart';
+import 'BookDetails/BookDetailsPage.dart'; // Add this import
 
 class booksListPage extends StatelessWidget {
-   booksListPage({super.key});
+  booksListPage({super.key});
 
   final controller = Get.put(BooksController());
 
@@ -36,18 +36,33 @@ class booksListPage extends StatelessWidget {
       ),
 
       body: Container(
-        padding: EdgeInsets.all(15),
-        child:Obx(() {
-          return ListView.builder(
-            itemCount: controller.books.length,
-             itemBuilder: (BuildContext context, int index) {
-               var book = controller.books[index];
-               return listForm(title: book['title'], subtitle: book['description'], nav: "nav", image: book['image'], numLike: book['likes'],);
-             },
-
-        );
-        }
-    )
+          padding: EdgeInsets.all(15),
+          child:Obx(() {
+            return ListView.builder(
+              itemCount: controller.books.length,
+              itemBuilder: (BuildContext context, int index) {
+                var book = controller.books[index];
+                return listForm(
+                  title: book['title'],
+                  subtitle: book['description'],
+                  nav: "", // Keep empty since we're using custom onTap
+                  image: book['image'],
+                  numLike: book['likes'],
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BookDetailsPage(
+                          bookId: book['id'].toString(),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          }
+          )
       ),
 
     );

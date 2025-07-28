@@ -6,6 +6,7 @@ import '../../controller/variables.dart';
 import '../GlobalWideget/listForm.dart';
 import '../GlobalWideget/styleText.dart';
 import '../HomePage/homeWideGet/homeDrawer.dart';
+import '../Movies/MovieDetails/MovieDetailsPage.dart'; // Add this import
 
 class moviesListPage extends StatelessWidget {
   const moviesListPage({super.key});
@@ -57,9 +58,19 @@ class moviesListPage extends StatelessWidget {
             return listForm(
               title: movie['title'] ?? 'No Title',
               subtitle: movie['description'] ?? '',
-              nav: "/movieDetails",
+              nav: "", // Keep empty since we're using custom onTap
               image: movie['image'] ?? 'images/placeholder.jpg',
               numLike: movie['likes']?.toString() ?? '0',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MovieDetailsPage(
+                      filmId: movie['id'].toString(),
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
