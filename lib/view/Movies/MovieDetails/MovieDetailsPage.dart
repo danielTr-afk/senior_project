@@ -20,8 +20,11 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
   Map<String, dynamic>? movieData;
   bool isLoading = true;
   bool showComments = false;
+  bool isLiked = false; // Track like status
+  bool isLikeLoading = false; // Track like operation loading
   List<Map<String, dynamic>> comments = [];
   TextEditingController commentController = TextEditingController();
+  String currentUserId = '32'; // You should get this from your auth system
 
   @override
   void initState() {
@@ -48,6 +51,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
             movieData = data['data']['films'][0];
             isLoading = false;
           });
+
+          // After getting movie details, check like status
+          await checkFilmLikeStatus();
         }
       }
     } catch (e) {
@@ -58,34 +64,109 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
     }
   }
 
-  Future<void> toggleLike() async {
+  Future<void> checkFilmLikeStatus() async {
     try {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2/BookFlix/toggle_like.php'),
-        body: {
-          'film_id': widget.filmId,
-        },
+      print('Checking like status for film ID: ${widget.filmId}, User ID: $currentUserId');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2/BookFlix/check_film_like_status.php?film_id=${widget.filmId}&user_id=$currentUserId'),
       );
+
+      print('Like status response code: ${response.statusCode}');
+      print('Like status response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['status'] == 'success') {
           setState(() {
-            if (movieData != null) {
-              movieData!['likes'] = data['likes'];
-            }
+            isLiked = data['is_liked'] ?? false;
           });
-          // Show a brief feedback to user
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Thanks for liking!'),
-              duration: Duration(seconds: 1),
-            ),
-          );
+          print('Like status updated: $isLiked');
+        } else {
+          print('Error checking like status: ${data['message']}');
         }
       }
     } catch (e) {
+      print('Error checking film like status: $e');
+    }
+  }
+
+  Future<void> toggleLike() async {
+    if (isLikeLoading) return; // Prevent multiple simultaneous requests
+
+    setState(() {
+      isLikeLoading = true;
+    });
+
+    try {
+      print('Attempting to toggle like for film ID: ${widget.filmId}');
+
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2/BookFlix/toggle_like_film.php'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'film_id': widget.filmId,
+          'user_id': currentUserId,
+        },
+      );
+
+      print('Toggle like response status code: ${response.statusCode}');
+      print('Toggle like response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print('Parsed response data: $data');
+
+        if (data['status'] == 'success') {
+          setState(() {
+            if (movieData != null) {
+              movieData!['likes'] = data['likes'];
+            }
+            isLiked = data['is_liked'] ?? false;
+          });
+
+          // Show feedback to user
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(data['message'] ?? (isLiked ? 'Movie liked!' : 'Movie unliked!')),
+              duration: Duration(seconds: 2),
+              backgroundColor: isLiked ? Colors.red : Colors.grey,
+            ),
+          );
+        } else {
+          // Handle error response
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${data['message'] ?? 'Unknown error'}'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        print('HTTP Error: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Server error: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
       print('Error toggling like: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Network error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+    } finally {
+      setState(() {
+        isLikeLoading = false;
+      });
     }
   }
 
@@ -217,7 +298,7 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
         Uri.parse('http://10.0.2.2/BookFlix/add_comment.php'),
         body: {
           'film_id': widget.filmId,
-          'user_id': '32', // Replace with actual user ID
+          'user_id': currentUserId,
           'comment': comment,
         },
       );
@@ -476,12 +557,42 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> {
                   SizedBox(height: 15),
                   Row(
                     children: [
-                      // Like button
+                      // Like button with dynamic icon and loading state
                       GestureDetector(
-                        onTap: toggleLike,
-                        child: _buildInfoBadge(
-                          context,
-                          "❤️ ${movieData!['likes'] ?? 0}",
+                        onTap: isLikeLoading ? null : toggleLike,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isLiked ? Colors.red.withOpacity(0.2) : blackColor2,
+                            borderRadius: BorderRadius.circular(6),
+                            border: isLiked ? Border.all(color: Colors.red, width: 1) : null,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (isLikeLoading)
+                                SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: secondaryColor,
+                                  ),
+                                )
+                              else
+                                Icon(
+                                  isLiked ? Icons.favorite : Icons.favorite_border,
+                                  color: isLiked ? Colors.red : textColor2,
+                                  size: 16,
+                                ),
+                              SizedBox(width: 4),
+                              styleText(
+                                text: "${movieData!['likes'] ?? 0}",
+                                fSize: 14,
+                                color: textColor2,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(width: 8),

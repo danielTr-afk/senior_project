@@ -67,7 +67,7 @@ class signup extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             authTextForm(
-                              hint: "Name",
+                              hint: "User Name",
                               sufIcon: const Icon(Icons.person),
                               obscure: false,
                               textFormController: controller.name,
