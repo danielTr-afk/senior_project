@@ -33,12 +33,6 @@ class moviesCategories extends StatelessWidget {
             icon: Icon(Icons.menu, size: 30, color: textColor2),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: textColor2),
-            onPressed: () => controller.refreshMovies(),
-          ),
-        ],
       ),
       drawer: homeDrawer(),
       bottomNavigationBar: homeBottomNav(index: 2),

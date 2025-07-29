@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/authController/loginGetX.dart';
@@ -113,7 +114,7 @@ class homePage extends StatelessWidget {
                             }
                             return ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: 2,
+                              itemCount: 3,
                               itemBuilder: (BuildContext context, int index) {
                                 var movie = movieController.movies[index];
                                 return GestureDetector(
@@ -151,21 +152,18 @@ class homePage extends StatelessWidget {
                                           child: SizedBox(
                                             height: 200,
                                             width: double.infinity,
-                                            child: Image.network(
-                                              movie['image'] ?? "images/onBoardingImage/onboardingphoto2.png",
+                                            child: CachedNetworkImage(
+                                              imageUrl: movie['image'] ?? "images/onBoardingImage/onboardingphoto2.png",
                                               fit: BoxFit.cover,
-                                              loadingBuilder: (context, child, loadingProgress) {
-                                                if (loadingProgress == null) return child;
-                                                return Center(
+                                              placeholder: (context, url) => Container(
+                                                color: Colors.grey[800],
+                                                child: Center(
                                                   child: CircularProgressIndicator(
-                                                    value: loadingProgress.expectedTotalBytes != null
-                                                        ? loadingProgress.cumulativeBytesLoaded /
-                                                        loadingProgress.expectedTotalBytes!
-                                                        : null,
+                                                    color: secondaryColor,
                                                   ),
-                                                );
-                                              },
-                                              errorBuilder: (context, error, stackTrace) => Container(
+                                                ),
+                                              ),
+                                              errorWidget: (context, url, error) => Container(
                                                 color: Colors.grey[300],
                                                 child: Center(
                                                   child: Icon(
@@ -230,7 +228,7 @@ class homePage extends StatelessWidget {
                             }
                             return ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: 2,
+                              itemCount: 3,
                               itemBuilder: (BuildContext context, int index) {
                                 var book = controller.books[index];
                                 return GestureDetector(
@@ -268,21 +266,18 @@ class homePage extends StatelessWidget {
                                           child: SizedBox(
                                             height: 200,
                                             width: double.infinity,
-                                            child: Image.network(
-                                              book['image'],
+                                            child: CachedNetworkImage(
+                                              imageUrl: book['image'],
                                               fit: BoxFit.cover,
-                                              loadingBuilder: (context, child, loadingProgress) {
-                                                if (loadingProgress == null) return child;
-                                                return Center(
+                                              placeholder: (context, url) => Container(
+                                                color: Colors.grey[800],
+                                                child: Center(
                                                   child: CircularProgressIndicator(
-                                                    value: loadingProgress.expectedTotalBytes != null
-                                                        ? loadingProgress.cumulativeBytesLoaded /
-                                                        loadingProgress.expectedTotalBytes!
-                                                        : null,
+                                                    color: secondaryColor,
                                                   ),
-                                                );
-                                              },
-                                              errorBuilder: (context, error, stackTrace) => Container(
+                                                ),
+                                              ),
+                                              errorWidget: (context, url, error) => Container(
                                                 color: Colors.grey[300],
                                                 child: Center(
                                                   child: Icon(
@@ -295,6 +290,7 @@ class homePage extends StatelessWidget {
                                             ),
                                           ),
                                         ),
+
                                         Padding(
                                           padding: const EdgeInsets.all(12),
                                           child: SizedBox(

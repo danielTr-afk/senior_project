@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../controller/variables.dart';
 import 'styleText.dart';
 
@@ -11,7 +12,7 @@ class listForm extends StatelessWidget {
     required this.nav,
     required this.image,
     required this.numLike,
-    this.onTap, // Add optional onTap parameter
+    this.onTap,
   });
 
   final String title;
@@ -19,7 +20,7 @@ class listForm extends StatelessWidget {
   final String nav;
   final String image;
   final String numLike;
-  final VoidCallback? onTap; // Add onTap callback
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class listForm extends StatelessWidget {
         color: blackColor2,
         elevation: 2,
         child: InkWell(
-          onTap: onTap ?? () => Get.offAll(nav), // Use custom onTap if provided, otherwise use default navigation
+          onTap: onTap ?? () => Get.offAll(nav),
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.all(12),
@@ -41,30 +42,26 @@ class listForm extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    width: 100, // Fixed width
+                    width: 100,
                     constraints: BoxConstraints(
-                      minHeight: 150, // Minimum height
-                      maxHeight: 200, // Maximum height
+                      minHeight: 150,
+                      maxHeight: 200,
                     ),
-                    child: Image.network(
-                      image,
+                    child: CachedNetworkImage(
+                      imageUrl: image,
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[800],
+                        child: Center(
                           child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                                : null,
+                            color: secondaryColor,
                           ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(
-                            color: Colors.grey[800],
-                            child: Icon(Icons.book, size: 40, color: Colors.grey),
-                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[800],
+                        child: Icon(Icons.book, size: 40, color: Colors.grey),
+                      ),
                     ),
                   ),
                 ),

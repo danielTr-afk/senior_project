@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:flutter/material.dart';
@@ -441,11 +442,22 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      bookData!['image'] ?? '',
+                    child: CachedNetworkImage(
+                      imageUrl: bookData!['image'] ?? '',
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(Icons.book, size: 50, color: textColor2),
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[800],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: secondaryColor,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[800],
+                        child: Icon(Icons.book, size: 50, color: textColor2),
+                      ),
                     ),
                   ),
                 ),

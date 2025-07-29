@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:f_book2/controller/variables.dart';
 import 'package:f_book2/view/GlobalWideget/styleText.dart';
 import 'package:flutter/material.dart';
@@ -428,30 +429,21 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> with AutomaticKeepA
                           Rect.fromLTRB(0, 0, rect.width, rect.height));
                     },
                     blendMode: BlendMode.dstIn,
-                    child: Image.network(
-                      movieData!['image']?.toString() ?? '',
+                    child: CachedNetworkImage(
+                      imageUrl: movieData!['image']?.toString() ?? '',
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey,
-                          child: const Icon(Icons.error, color: Colors.white),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: Colors.grey[800],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                              color: secondaryColor,
-                            ),
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[800],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: secondaryColor,
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey,
+                        child: const Icon(Icons.error, color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
