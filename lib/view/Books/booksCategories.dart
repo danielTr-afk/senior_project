@@ -5,6 +5,7 @@ import '../../controller/books/booksController.dart';
 import '../../controller/variables.dart';
 import '../GlobalWideget/bfCrad2.dart';
 import '../GlobalWideget/styleText.dart';
+import '../HomePage/homeWideGet/DrawerRole.dart';
 import '../HomePage/homeWideGet/homeBottomNav.dart';
 import '../HomePage/homeWideGet/homeDrawer.dart';
 import '../HomePage/homeWideGet/titleSection.dart';
@@ -32,7 +33,7 @@ class booksCategories extends StatelessWidget {
           ),
         ),
       ),
-      drawer: homeDrawer(),
+      drawer: getRoleBasedDrawer(),
       bottomNavigationBar: homeBottomNav(index: 1),
       body: Container(
         padding: const EdgeInsets.all(15),

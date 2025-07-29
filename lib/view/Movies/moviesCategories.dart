@@ -4,6 +4,7 @@ import '../../controller/movies/moviesController.dart';
 import '../../controller/variables.dart';
 import '../GlobalWideget/bfCrad2.dart';
 import '../GlobalWideget/styleText.dart';
+import '../HomePage/homeWideGet/DrawerRole.dart';
 import '../HomePage/homeWideGet/homeBottomNav.dart';
 import '../HomePage/homeWideGet/homeDrawer.dart';
 import '../HomePage/homeWideGet/titleSection.dart';
@@ -34,7 +35,7 @@ class moviesCategories extends StatelessWidget {
           ),
         ),
       ),
-      drawer: homeDrawer(),
+      drawer: getRoleBasedDrawer(),
       bottomNavigationBar: homeBottomNav(index: 2),
       body: Container(
         color: blackColor2,

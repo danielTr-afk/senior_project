@@ -8,6 +8,7 @@ import '../../controller/variables.dart';
 import '../GlobalWideget/styleText.dart';
 import '../Books/BookDetails/BookDetailsPage.dart'; // Add this import
 import '../Movies/MovieDetails/MovieDetailsPage.dart'; // Add this import
+import 'homeWideGet/DrawerRole.dart';
 import 'homeWideGet/bfCard.dart';
 import 'homeWideGet/homeBottomNav.dart';
 import 'homeWideGet/homeDrawer.dart';
@@ -23,7 +24,7 @@ class homePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: homeDrawer(),
+        drawer: getRoleBasedDrawer(),
         bottomNavigationBar: homeBottomNav(
           index: 0,
         ),
