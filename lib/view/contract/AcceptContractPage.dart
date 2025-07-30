@@ -445,35 +445,6 @@ class AcceptContractPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
               ],
-
-              // Message Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: mainColor2!, width: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    // Navigate to messaging page or show message dialog
-                    Get.snackbar(
-                      'Message',
-                      'Opening chat with ${otherPartyName}...',
-                      backgroundColor: mainColor2,
-                      colorText: textColor2,
-                    );
-                  },
-                  child: styleText(
-                    text: "Message ${otherPartyRole}",
-                    fSize: 22,
-                    color: textColor2,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
             ],
           ),
         );

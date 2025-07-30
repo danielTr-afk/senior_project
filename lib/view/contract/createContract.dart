@@ -506,27 +506,6 @@ class createContract extends StatelessWidget {
               ),
             )),
             const SizedBox(height: 15),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: mainColor2!, width: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  Get.snackbar("Message", "Message feature coming soon!");
-                },
-                child: styleText(
-                  text: "Message Recipient",
-                  fSize: 22,
-                  color: textColor2,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
           ],
         ),
       ),

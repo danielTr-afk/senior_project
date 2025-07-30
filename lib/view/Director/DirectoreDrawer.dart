@@ -108,7 +108,7 @@ class DirectoreDrawer extends StatelessWidget {
                   image: DecorationImage(
                     image: loginController.profileImage.value.isNotEmpty
                         ? NetworkImage(loginController.profileImage.value)
-                        : const NetworkImage("https://randomuser.me/api/portraits/men/1.jpg"),
+                        : NetworkImage(loginController.profileImage.value),
                     fit: BoxFit.cover,
                   ),
                 ),

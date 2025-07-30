@@ -1,3 +1,4 @@
+import 'package:f_book2/view/Message/ChatPage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -96,9 +97,8 @@ class HelpPage extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Get.to(() => message(
-
-                  ));                },
+                  Get.to(ChatPage());
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: secondaryColor,
                   padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),

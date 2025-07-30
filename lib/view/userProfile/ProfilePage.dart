@@ -58,7 +58,7 @@ class ProfilePage extends StatelessWidget {
               backgroundImage: NetworkImage(
                 loginController.profileImage.value.isNotEmpty
                     ? loginController.profileImage.value
-                    : 'https://randomuser.me/api/portraits/men/1.jpg', // Default image
+                    : loginController.profileImage.value, // Default image
               ),
               radius: 100,
             )),
