@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:get/get.dart';
 import '../../../controller/authController/loginGetX.dart';
+import '../../../controller/profileSetting/FavoritesController.dart';
 
 class MovieDetailsPage extends StatefulWidget {
   final String filmId;
@@ -38,6 +39,9 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> with AutomaticKeepA
       return '32'; // fallback ID
     }
   }
+
+  // Get the favorites controller
+  final FavoritesController favoritesController = Get.put(FavoritesController());
 
   @override
   bool get wantKeepAlive => true;
@@ -88,6 +92,12 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> with AutomaticKeepA
           duration: const Duration(seconds: 3),
         ),
       );
+    }
+  }
+
+  void toggleMovieFavorite() {
+    if (movieData != null) {
+      favoritesController.toggleMovieFavorite(movieData!);
     }
   }
 
@@ -488,7 +498,18 @@ class _MovieDetailsPageState extends State<MovieDetailsPage> with AutomaticKeepA
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Icon(Icons.bookmark_border, color: Colors.white),
+                      Obx(() => GestureDetector(
+                        onTap: toggleMovieFavorite,
+                        child: Icon(
+                          favoritesController.isMovieFavorite(widget.filmId)
+                              ? Icons.bookmark
+                              : Icons.bookmark_border,
+                          color: favoritesController.isMovieFavorite(widget.filmId)
+                              ? secondaryColor
+                              : Colors.white,
+                          size: 28,
+                        ),
+                      )),
                     ],
                   ),
                   const SizedBox(height: 10),

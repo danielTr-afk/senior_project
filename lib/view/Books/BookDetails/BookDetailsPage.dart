@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 
 import '../../../controller/authController/loginGetX.dart';
+import '../../../controller/profileSetting/FavoritesController.dart';
 
 class BookDetailsPage extends StatefulWidget {
   final String bookId;
@@ -31,6 +32,8 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
 
   // Get the login controller to access user data
   final loginGetx loginController = Get.find<loginGetx>();
+  // Get the favorites controller
+  final FavoritesController favoritesController = Get.put(FavoritesController());
 
   @override
   void initState() {
@@ -173,6 +176,12 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
       setState(() {
         isLoadingLike = false;
       });
+    }
+  }
+
+  void toggleFavorite() {
+    if (bookData != null) {
+      favoritesController.toggleBookFavorite(bookData!);
     }
   }
 
@@ -407,22 +416,17 @@ class _BookDetailsPageState extends State<BookDetailsPage> {
           fontWeight: FontWeight.bold,
         ),
         actions: [
-          IconButton(
-            icon: isLoadingLike
-                ? SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: textColor2,
-              ),
-            )
-                : Icon(
-              Icons.favorite,
-              color: textColor2,
+          Obx(() => IconButton(
+            icon: Icon(
+              favoritesController.isBookFavorite(widget.bookId)
+                  ? Icons.favorite
+                  : Icons.favorite_border,
+              color: favoritesController.isBookFavorite(widget.bookId)
+                  ? Colors.red
+                  : textColor2,
             ),
-            onPressed: (){},
-          ),
+            onPressed: toggleFavorite,
+          )),
         ],
       ),
       body: SingleChildScrollView(

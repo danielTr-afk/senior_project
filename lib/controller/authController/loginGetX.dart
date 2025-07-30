@@ -11,6 +11,8 @@ class loginGetx extends GetxController {
   var userId = 0.obs;
   var profileImage = ''.obs;
   var userRole = 0.obs;
+  var userPhone = ''.obs; // Added phone observable
+  var userGender = ''.obs; // Added gender observable
 
   @override
   void onInit() {
@@ -45,16 +47,28 @@ class loginGetx extends GetxController {
             "password": password,
           }));
 
+      print("Raw API response: ${response.body}"); // Add this debug line
+
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
         if (json['success'] == true) {
-          // Add null checks and type conversion
           final data = json['data'] ?? {};
-          userName.value = data['name']?.toString() ?? '';
+          print("API data: $data"); // Debug the complete data object
+
+          userName.value = data['name']?.toString() ?? 'Unknown';
           userEmail.value = data['email']?.toString() ?? '';
           userId.value = int.tryParse(data['id']?.toString() ?? '') ?? 0;
           userRole.value = int.tryParse(data['role_id']?.toString() ?? '') ?? 0;
           profileImage.value = data['profile_image']?.toString() ?? '';
+
+          // Updated phone and gender handling
+          userPhone.value = data['phone']?.toString() ?? 'Not provided';
+          userGender.value = data['gender']?.toString() ?? 'Not specified';
+
+          // Debug the values being set
+          print("Setting values:");
+          print("Phone: ${userPhone.value}");
+          print("Gender: ${userGender.value}");
 
           Get.snackbar("Success", json['message']?.toString() ?? 'Login successful');
           Get.offAllNamed("/homePage");
@@ -66,6 +80,7 @@ class loginGetx extends GetxController {
       }
     } catch (e) {
       Get.snackbar("Error", "An error occurred: ${e.toString()}");
+      print("Login error: $e");
     } finally {
       isLoading.value = false;
     }

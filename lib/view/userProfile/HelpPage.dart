@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controller/variables.dart';
 import '../GlobalWideget/styleText.dart';
+import '../Message/message.dart';
 
 
 class HelpPage extends StatelessWidget {
@@ -95,9 +96,9 @@ class HelpPage extends StatelessWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Add your contact admin functionality here
-                  // For example: Navigator.push(context, MaterialPageRoute(builder: (context) => ContactAdminPage()));
-                },
+                  Get.to(() => message(
+
+                  ));                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: secondaryColor,
                   padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
